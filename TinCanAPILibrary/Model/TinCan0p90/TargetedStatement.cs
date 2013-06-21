@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 using System.Text;
 
-namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
+namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
     public class TargetedStatement : StatementTarget
     {

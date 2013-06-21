@@ -68,6 +68,10 @@ namespace RusticiSoftware.TinCanAPILibrary
                 {
                     case TCAPIVersion.TinCan095:
                         return "0.95";
+                    case TCAPIVersion.TinCan090:
+                        return "0.9";
+                    case TCAPIVersion.TinCan1p0p0:
+                        return "1.0.0";
                     default:
                         return null;
                 }
@@ -249,10 +253,15 @@ namespace RusticiSoftware.TinCanAPILibrary
             version = whc["X-Experience-API-Version"];
             if (string.IsNullOrEmpty(version))
             {
+                // TODO - find out official policy on default version assumptions
             }
             else if (version.Equals("0.95") || version.Equals(".95"))
             {
                 return TCAPIVersion.TinCan095;
+            }
+            else if (version.StartsWith("1.0."))
+            {
+                return TCAPIVersion.TinCan1p0p0;
             }
             return TCAPIVersion.TinCan090;
         }
@@ -312,13 +321,24 @@ namespace RusticiSoftware.TinCanAPILibrary
                 }
                 TinCanJsonConverter converter = new TinCanJsonConverter();
                 string postData;
+                // TODO - Note that the xAPI specification specifically forbids downgrading statements!
                 switch (version)
                 {
                     case TCAPIVersion.TinCan090:
-                        Model.TinCan090.Statement[] currentBatch = new RusticiSoftware.TinCanAPILibrary.Model.TinCan090.Statement[batches[round].Length];
-                        for (int i = 0; i < currentBatch.Length; i++)
-                            currentBatch[i] = (Model.TinCan090.Statement)batches[round][i];
-                        postData = converter.SerializeToJSON(currentBatch);
+                        var currentBatch0p90 = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement[batches[round].Length];
+                        for (int i = 0; i < currentBatch0p90.Length; i++)
+                        {
+                            currentBatch0p90[i] = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement)batches[round][i];
+                        }
+                        postData = converter.SerializeToJSON(currentBatch0p90);
+                        break;
+                    case TCAPIVersion.TinCan095:
+                        var currentBatch0p95 = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement[batches[round].Length];
+                        for (int i = 0; i < currentBatch0p95.Length; i++)
+                        {
+                            currentBatch0p95[i] = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)batches[round][i];
+                        }
+                        postData = converter.SerializeToJSON(currentBatch0p95);
                         break;
                     default:
                         postData = converter.SerializeToJSON(batches[round]);
@@ -366,7 +386,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                 switch (version)
                 {
                     case TCAPIVersion.TinCan090:
-                        voided.Object = new Model.TinCan090.TargetedStatement(statementIdsToVoid[i]);
+                        voided.Object = new Model.TinCan0p90.TargetedStatement(statementIdsToVoid[i]);
                         break;
                     default:
                         voided.Object = new StatementRef(statementIdsToVoid[i]);
@@ -399,7 +419,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                 switch (version)
                 {
                     case TCAPIVersion.TinCan090:
-                        voided.Object = new Model.TinCan090.TargetedStatement(statementIdsToVoid[i]);
+                        voided.Object = new Model.TinCan0p90.TargetedStatement(statementIdsToVoid[i]);
                         break;
                     default:
                         voided.Object = new StatementRef(statementIdsToVoid[i]);
@@ -429,11 +449,14 @@ namespace RusticiSoftware.TinCanAPILibrary
             Statement statementResult = null;
             switch (version)
             {
+                case TCAPIVersion.TinCan1p0p0:
+                    statementResult = (Statement)converter.DeserializeJSON(result, typeof(Statement));
+                    break;
                 case TCAPIVersion.TinCan090:
-                    statementResult = (Statement)((Model.TinCan090.Statement)converter.DeserializeJSON(result, typeof(Model.TinCan090.Statement)));
+                    statementResult = (Statement)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement)converter.DeserializeJSON(result, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement)));
                     break;
                 case TCAPIVersion.TinCan095:
-                    statementResult = (Statement)converter.DeserializeJSON(result, typeof(Statement));
+                    statementResult = (Statement)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)converter.DeserializeJSON(result, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)));
                     break;
             }
             return statementResult;
@@ -452,11 +475,12 @@ namespace RusticiSoftware.TinCanAPILibrary
             StatementResult result = null;
             switch (version)
             {
+                // TODO - fix the versioning here! Quite broken
                 case TCAPIVersion.TinCan095:
                     result = (StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(StatementResult));
                     break;
                 case TCAPIVersion.TinCan090:
-                    result = (StatementResult)((Model.TinCan090.StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(Model.TinCan090.StatementResult)));
+                    result = (StatementResult)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)));
                     break;
             }
             return result;
@@ -474,11 +498,14 @@ namespace RusticiSoftware.TinCanAPILibrary
             StatementResult result = null;
             switch (version)
             {
-                case TCAPIVersion.TinCan095:
+                case TCAPIVersion.TinCan1p0p0:
                     result = (StatementResult)converter.DeserializeJSON(getResult, typeof(StatementResult));
                     break;
+                case TCAPIVersion.TinCan095:
+                    result = (StatementResult)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult)converter.DeserializeJSON(getResult, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult)));
+                    break;
                 case TCAPIVersion.TinCan090:
-                    result = (StatementResult)((Model.TinCan090.StatementResult)converter.DeserializeJSON(getResult, typeof(Model.TinCan090.StatementResult)));
+                    result = (StatementResult)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)converter.DeserializeJSON(getResult, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)));
                     break;
             }
             return result;
@@ -499,7 +526,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)partialActor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)partialActor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(partialActor);
@@ -512,7 +539,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                     result = (Actor)converter.DeserializeJSON(getResult, typeof(Actor));
                     break;
                 case TCAPIVersion.TinCan090:
-                    result = (Actor)((Model.TinCan090.Actor)converter.DeserializeJSON(getResult, typeof(Model.TinCan090.Actor)));
+                    result = (Actor)((Model.TinCan0p90.Actor)converter.DeserializeJSON(getResult, typeof(Model.TinCan0p90.Actor)));
                     break;
             }
 
@@ -534,7 +561,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -577,7 +604,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)previousProfile.Actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)previousProfile.Actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(previousProfile.Actor);
@@ -603,7 +630,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -624,7 +651,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -657,7 +684,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -710,7 +737,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -755,7 +782,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -824,7 +851,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)activityState.Actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)activityState.Actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(activityState.Actor);
@@ -865,7 +892,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 case TCAPIVersion.TinCan090:
-                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                    nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                     break;
                 default:
                     nvc["actor"] = converter.SerializeToJSON(actor);
@@ -1109,7 +1136,9 @@ namespace RusticiSoftware.TinCanAPILibrary
             StatementQueryObject qo = new StatementQueryObject();
             qo.Limit = 1;
             NameValueCollection nvc = qo.ToNameValueCollection(version);
-            HttpMethods.GetRequest(nvc, endpoint + STATEMENTS, authentification, out whc, "0.95");
+            // TODO - seems inefficient to be doing a full pull-down of the statements resource just to determine version
+            // consider trying the "about" endpoint or at least a "HEAD" request
+            HttpMethods.GetRequest(nvc, endpoint + STATEMENTS, authentification, out whc, versionString);
             return whc;
         }
 

@@ -215,9 +215,9 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <param name="source">A tincan 0.95 Actor</param>
         /// <returns>A tincan 0.90 actor</returns>
         /// <remarks></remarks>
-        public static explicit operator Model.TinCan090.Actor(Actor source)
+        public static explicit operator Model.TinCan0p90.Actor(Actor source)
         {
-            return new Model.TinCan090.Actor(source.Name, source.Mbox, source.Mbox_sha1sum, source.Openid, source.Account);
+            return new Model.TinCan0p90.Actor(source.Name, source.Mbox, source.Mbox_sha1sum, source.Openid, source.Account);
         }
         #endregion
     }

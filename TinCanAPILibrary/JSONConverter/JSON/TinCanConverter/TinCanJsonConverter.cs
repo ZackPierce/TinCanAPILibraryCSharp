@@ -69,9 +69,9 @@ namespace RusticiSoftware.TinCanAPILibrary
             this.RegisterDefaultConverter(typeof(InteractionDefinition));
 
             // TinCan 90
-            this.RegisterDefaultConverter(typeof(Model.TinCan090.Actor));
-            this.RegisterDefaultConverter(typeof(Model.TinCan090.Person));
-            this.RegisterDefaultConverter(typeof(Model.TinCan090.TargetedStatement));
+            this.RegisterDefaultConverter(typeof(Model.TinCan0p90.Actor));
+            this.RegisterDefaultConverter(typeof(Model.TinCan0p90.Person));
+            this.RegisterDefaultConverter(typeof(Model.TinCan0p90.TargetedStatement));
         }
     }
 }

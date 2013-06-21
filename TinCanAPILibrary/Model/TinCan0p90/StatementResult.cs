@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 using System.Text;
 
-namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
+namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
     public class StatementResult
     {
@@ -60,15 +60,31 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
         #endregion
 
         #region TinCan 0.95 Promotion
-        public static explicit operator Model.StatementResult(StatementResult source)
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult(StatementResult source)
         {
-            Model.StatementResult result = new Model.StatementResult();
+            var result = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult();
             result.ContinueToken = source.ContinueToken;
             result.More = source.More;
-            result.Statements = new Model.Statement[source.Statements.Length];
+            result.Statements = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement[source.Statements.Length];
             for (int i = 0; i < result.Statements.Length; i++)
             {
-                result.Statements[i] = (Model.Statement)source.Statements[i];
+                result.Statements[i] = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)source.Statements[i];
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region TinCan 1.0.0 Promotion
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.StatementResult(StatementResult source)
+        {
+            var result = new RusticiSoftware.TinCanAPILibrary.Model.StatementResult();
+            result.ContinueToken = source.ContinueToken;
+            result.More = source.More;
+            result.Statements = new RusticiSoftware.TinCanAPILibrary.Model.Statement[source.Statements.Length];
+            for (int i = 0; i < result.Statements.Length; i++)
+            {
+                result.Statements[i] = (RusticiSoftware.TinCanAPILibrary.Model.Statement)source.Statements[i];
             }
 
             return result;

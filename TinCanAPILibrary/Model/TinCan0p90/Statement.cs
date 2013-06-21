@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Text;
 using RusticiSoftware.TinCanAPILibrary.Helper;
 
-namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
+namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
     public class Statement : IValidatable
     {
@@ -331,9 +331,9 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
         /// <remarks>This method returns a shallow-copy-like conversion.  Any
         /// fields that could be used as reference parameters are, and as
         /// such the two instances of the statement are inextricably linked.</remarks>
-        public static explicit operator Model.Statement(Statement source)
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement(Statement source)
         {
-            Model.Statement result = new Model.Statement();
+            var result = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement();
             result.Id = source.Id;
             result.Actor = (Model.Actor)source.Actor;
             result.Verb = new Model.StatementVerb(source.verb);
@@ -348,6 +348,13 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
             result.Voided = source.Voided;
 
             return result;
+        }
+        #endregion
+
+        #region TinCan 1.0.0 Promotion
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.Statement(Statement source)
+        {
+            throw new NotImplementedException(); // TODO
         }
         #endregion
     }

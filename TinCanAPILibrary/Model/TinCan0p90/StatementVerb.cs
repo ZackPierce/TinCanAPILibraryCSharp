@@ -17,7 +17,7 @@ limitations under the License.
 #endregion
 using System;
 
-namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan090
+namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
     public enum StatementVerb
     {

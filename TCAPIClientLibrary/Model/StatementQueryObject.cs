@@ -162,7 +162,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 switch( version)
                 {
                     case TCAPIVersion.TinCan090:
-                        nvc["actor"] = converter.SerializeToJSON((Model.TinCan090.Actor)actor);
+                        nvc["actor"] = converter.SerializeToJSON((Model.TinCan0p90.Actor)actor);
                         break;
                     default:
                         nvc["actor"] = converter.SerializeToJSON(actor);

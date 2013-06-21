@@ -40,7 +40,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             }
             if (string.Compare(typeField, "Person", true) == 0)
             {
-                return typeof(Model.TinCan090.Person);
+                return typeof(Model.TinCan0p90.Person);
             }
             if (string.Compare(typeField, "Group", true) == 0)
             {
@@ -48,7 +48,7 @@ namespace RusticiSoftware.TinCanAPILibrary
             }
             if (string.Compare(typeField, "Statement", true) == 0)
             {
-                return typeof(Model.TinCan090.TargetedStatement);
+                return typeof(Model.TinCan0p90.TargetedStatement);
             }
             if (string.Compare(typeField, "StatementRef", true) == 0)
             {

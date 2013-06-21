@@ -103,7 +103,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <param name="verb"></param>
         /// <remarks>You really shouldn't be using this method.  It's simply used as an easy way to promote the
         /// verb enum to the verb class.</remarks>
-        public StatementVerb(Model.TinCan090.StatementVerb verb)
+        public StatementVerb(Model.TinCan0p90.StatementVerb verb)
             : this((PredefinedVerbs)Enum.Parse(typeof(PredefinedVerbs), verb.ToString(), true))
         {
         }
@@ -137,11 +137,11 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <returns></returns>
         /// <remarks>If no en-US entry is in the display map, this method will always fail and throw an exception.
         /// The core verbs from 0.90 are adl provided verbs in 0.95 to maintain some form of verb mapping.</remarks>
-        public static explicit operator Model.TinCan090.StatementVerb(StatementVerb verb)
+        public static explicit operator Model.TinCan0p90.StatementVerb(StatementVerb verb)
         {
             try
             {
-                return (Model.TinCan090.StatementVerb)Enum.Parse(typeof(Model.TinCan090.StatementVerb), verb.display["en-US"], true);
+                return (Model.TinCan0p90.StatementVerb)Enum.Parse(typeof(Model.TinCan0p90.StatementVerb), verb.display["en-US"], true);
             }
             catch (ArgumentException)
             {
