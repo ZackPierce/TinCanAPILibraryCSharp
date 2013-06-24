@@ -72,7 +72,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             var failures = new List<ValidationFailure>();
             if (id == null)
             {
-                failures.Add(new ValidationFailure("Activity does not have an identifier"));
+                failures.Add(new ValidationFailure("Activity does not have an identifier", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;

@@ -91,7 +91,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             var failures = new List<ValidationFailure>();
             if (scaled != null && (scaled.Value < 0.0 || scaled.Value > 1.0))
             {
-                failures.Add(new ValidationFailure("Scaled score must be between 0.0 and 1.0"));
+                failures.Add(new ValidationFailure("Scaled score must be between 0.0 and 1.0", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -99,7 +99,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             }
             if ((min != null && max != null) && (max.Value < min.Value))
             {
-                failures.Add(new ValidationFailure("Max score cannot be lower than min score"));
+                failures.Add(new ValidationFailure("Max score cannot be lower than min score", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -109,7 +109,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             {
                 if (max != null && raw.Value > max.Value)
                 {
-                    failures.Add(new ValidationFailure("Raw score cannot be greater than max score"));
+                    failures.Add(new ValidationFailure("Raw score cannot be greater than max score", ValidationLevel.Must));
                     if (earlyReturnOnFailure)
                     {
                         return failures;
@@ -117,7 +117,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 }
                 if (min != null && raw.Value < min.Value)
                 {
-                    failures.Add(new ValidationFailure("Raw score cannot be less than min score"));
+                    failures.Add(new ValidationFailure("Raw score cannot be less than min score", ValidationLevel.Must));
                     if (earlyReturnOnFailure)
                     {
                         return failures;

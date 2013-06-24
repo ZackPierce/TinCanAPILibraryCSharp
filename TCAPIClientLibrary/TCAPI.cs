@@ -316,7 +316,13 @@ namespace RusticiSoftware.TinCanAPILibrary
                     var failures = new List<ValidationFailure>(s.Validate(earlyReturnOnFailure: true));
                     if (failures.Count > 0)
                     {
-                        throw new ArgumentException(failures[0].Error, "statements");
+                        foreach (var failure in failures)
+                        {
+                            if (failure.Level == ValidationLevel.Must)
+                            {
+                                throw new ArgumentException(failure.Error, "statements");
+                            }
+                        }
                     }
                 }
                 TinCanJsonConverter converter = new TinCanJsonConverter();
@@ -366,7 +372,13 @@ namespace RusticiSoftware.TinCanAPILibrary
                 var failures = new List<ValidationFailure>(s.Validate(earlyReturnOnFailure: true));
                 if (failures.Count > 0)
                 {
-                    throw new ArgumentException(failures[0].Error, "statements");
+                    foreach (var failure in failures)
+                    {
+                        if (failure.Level == ValidationLevel.Must)
+                        {
+                            throw new ArgumentException(failure.Error, "statements");
+                        }
+                    }
                 }
             }
             offlineStorage.AddToStatementQueue(statements);

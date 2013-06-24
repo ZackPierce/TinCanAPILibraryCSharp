@@ -38,7 +38,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         private NullableDateTime timestamp;
         private NullableDateTime stored;
         private Actor authority;
-        
+
         #endregion
 
         #region Properties
@@ -62,22 +62,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public string Id
         {
             get { return id; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    id = null;
-                }
-                else
-                {
-                    string normalized = value.ToLower();
-                    if (!ValidationHelper.IsValidUUID(normalized))
-                    {
-                        throw new ArgumentException("Statement ID must be UUID", "value");
-                    }
-                    id = normalized;
-                }
-            }
+            set { id = value; }
         }
 
         /// <summary>
@@ -152,7 +137,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             set { authority = value; }
         }
 
-        
+
 
         #endregion
 
@@ -196,17 +181,35 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
-            if (actor == null && verb != null && !verb.IsVoided())
+            if (id == null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an actor"));
+                failures.Add(new ValidationFailure(string.Format("Statement had a null id property. Id should be a UUID string.", id), ValidationLevel.Should));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
                 }
             }
+            else if (!ValidationHelper.IsValidUuid(id))
+            {
+                failures.Add(new ValidationFailure(string.Format("Statement had an id of {0}, but ids, when present, must UUIDs", id), ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
+            if (actor == null && verb != null && !verb.IsVoided())
+            {
+                failures.Add(new ValidationFailure("Statement " + id + " does not have an actor", ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
             if (Verb == null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have a verb"));
+                failures.Add(new ValidationFailure("Statement " + id + " does not have a verb", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -219,16 +222,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                     (_object is Model.TinCan0p90.TargetedStatement) && !string.IsNullOrEmpty(((Model.TinCan0p90.TargetedStatement)_object).Id));
                 if (!objectStatementIdentified)
                 {
-                    failures.Add(new ValidationFailure("Statement " + id + " has verb 'voided' but does not properly identify a statement as its object"));
+                    failures.Add(new ValidationFailure("Statement " + id + " has verb 'voided' but does not properly identify a statement as its object", ValidationLevel.Must));
                     if (earlyReturnOnFailure)
                     {
                         return failures;
                     }
                 }
             }
+
             if (_object == null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an object"));
+                failures.Add(new ValidationFailure("Statement " + id + " does not have an object", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -321,6 +325,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         }
         #endregion
 
-        
+
     }
 }

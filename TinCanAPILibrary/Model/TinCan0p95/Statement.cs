@@ -72,7 +72,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
         #region TinCan 1.0.0 upgrade
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.Statement(Statement source)
         {
-            throw new NotImplementedException(); // TODO
+            var upgrade = new RusticiSoftware.TinCanAPILibrary.Model.Statement();
+            upgrade.Actor = source.Actor;
+            upgrade.Authority = source.Authority;
+            upgrade.Context = source.Context;
+            upgrade.Id = source.Id;
+            upgrade.Object = source.Object;
+            upgrade.Result = source.Result;
+            upgrade.Stored = source.Stored;
+            upgrade.Timestamp = source.Timestamp;
+            upgrade.Verb = source.Verb;
+            return upgrade;
         }
         #endregion
     }

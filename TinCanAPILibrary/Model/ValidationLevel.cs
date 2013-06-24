@@ -22,29 +22,14 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     using System.Collections.Generic;
     using System.Text;
 
-    public class ValidationFailure
+    /// <summary>
+    /// Degrees of validation failure severity.
+    /// </summary>
+    public enum ValidationLevel
     {
-        public string Error { get; private set; }
-        public ValidationLevel Level { get; private set; }
-
-        public ValidationFailure(string error, ValidationLevel level)
-        {
-            if (error == null)
-            {
-                throw new ArgumentNullException("error");
-            }
-            this.Error = error;
-            this.Level = level;
-        }
-
-        public ValidationFailure(ValidationFailure failure)
-        {
-            if (failure == null)
-            {
-                throw new ArgumentNullException("failure");
-            }
-            this.Error = failure.Error;
-            this.Level = failure.Level;
-        }
+        BestPractice = 0,
+        May = 1,
+        Should = 2,
+        Must = 4
     }
 }

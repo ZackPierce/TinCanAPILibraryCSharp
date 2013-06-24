@@ -54,7 +54,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 else
                 {
                     string normalized = value.ToLower();
-                    if (!ValidationHelper.IsValidUUID(normalized))
+                    if (!ValidationHelper.IsValidUuid(normalized))
                     {
                         throw new ArgumentException("Registration must be UUID", "value");
                     }

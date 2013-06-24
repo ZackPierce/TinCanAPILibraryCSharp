@@ -23,7 +23,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
     using System.Text;
 
     /// <summary>
-    /// TODO: Update summary.
+    /// Collection of TinCan 0.95 Statement resulting from a retrieval call.
     /// </summary>
     public class StatementResult
     {

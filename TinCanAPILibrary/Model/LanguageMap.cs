@@ -19,10 +19,11 @@ using System;
 using System.Collections.Generic;
 
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
-    public class LanguageMap : Dictionary<string, string>
+    public class LanguageMap : Dictionary<string, string>, IValidatable
     {
         public const string Undefined_Language_Code = "und";
 
@@ -64,5 +65,32 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
             return new LanguageString();
         }
+
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            foreach (var kvp in this)
+            {
+                if (!ValidationHelper.IsValidLanguageTag(kvp.Key))
+                {
+                    failures.Add(new ValidationFailure(string.Format("Language map key {0} does not conform to RFC 5646", kvp.Key), ValidationLevel.Must));
+                    if (earlyReturnOnFailure)
+                    {
+                        return failures;
+                    }
+                }
+                if (kvp.Value == null)
+                {
+                    failures.Add(new ValidationFailure(string.Format("Language Map value for key {0} was null, but should have been a string.", kvp.Key), ValidationLevel.Must));
+                    if (earlyReturnOnFailure)
+                    {
+                        return failures;
+                    }
+                }
+            }
+            return failures;
+        }
+
+        
     }
 }

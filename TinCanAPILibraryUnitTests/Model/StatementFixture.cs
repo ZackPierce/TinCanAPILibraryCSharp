@@ -37,17 +37,17 @@ namespace TinCanAPILibraryUnitTests.Model
         }
 
         [Test]
-        public void Id_setter_throws_exception_for_non_uuid_string()
+        public void Id_setter_does_not_throw_exception_for_non_uuid_string()
         {
             statement = new Statement();
-            Assert.Throws<ArgumentException>(() => statement.Id = "Not a proper UUID");
+            Assert.DoesNotThrow(() => statement.Id = "Not a proper UUID");
         }
 
         [Test]
         public void Validate_returns_non_null_enumerable_with_failure_results_when_invalid()
         {
             statement = new Statement();
-            IEnumerable<ValidationFailure> failures = statement.Validate(earlyReturnOnFailure : false);
+            var failures = statement.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(failures);
             Assert.GreaterOrEqual(new List<ValidationFailure>(failures).Count, 1, "Expect several errors due to lack of supplied statement information");
         }
@@ -55,14 +55,56 @@ namespace TinCanAPILibraryUnitTests.Model
         [Test]
         public void Validate_returns_non_null_empty_enumerable_when_valid()
         {
+            statement = CreateSimpleValidStatement();
+            var failures = statement.Validate(earlyReturnOnFailure: false);
+            Assert.NotNull(failures);
+            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 0);
+        }
+
+        [Test]
+        public void Validate_produces_failure_for_null_id()
+        {
+            statement = CreateSimpleValidStatement();
+            statement.Id = null;
+            var failures = statement.Validate(earlyReturnOnFailure: false);
+            Assert.NotNull(failures);
+            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 1);
+        }
+
+        [Test]
+        public void Validate_produces_failure_for_non_null_non_UUID_id()
+        {
+            statement = CreateSimpleValidStatement();
+            statement.Id = "Not a proper UUID";
+            var failures = statement.Validate(earlyReturnOnFailure: false);
+            Assert.NotNull(failures);
+            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 1);
+        }
+
+        [Test]
+        public void Validate_allows_upper_case_UUID_id()
+        {
+            statement = CreateSimpleValidStatement();
+            statement.Id = "E1EEC41F-1E93-4ED6-ACBF-5C4BD0C24269";
+            var failures = statement.Validate(earlyReturnOnFailure: false);
+            Assert.NotNull(failures);
+            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 0);
+        }
+
+        private static Statement CreateSimpleValidStatement()
+        {
             var activity = new Activity("http://www.example.com");
             activity.Definition = new ActivityDefinition();
             activity.Definition.Name = new LanguageMap();
             activity.Definition.Name.Add("en-US", "TCAPI C# 0.95 Library.");
-            statement = new Statement(new Actor("Example", "mailto:test@example.com"), new StatementVerb(PredefinedVerbs.Experienced), activity);
-            IEnumerable<ValidationFailure> failures = statement.Validate(earlyReturnOnFailure: false);
-            Assert.NotNull(failures);
-            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 0);
+            return new Statement(
+                    new Actor("Example", "mailto:test@example.com"),
+                    new StatementVerb("http://example.com/doSomething", "en-US", "Do something"),
+                    activity
+                )
+                {
+                    Id = "e1eec41f-1e93-4ed6-acbf-5c4bd0c24269"
+                };
         }
     }
 }

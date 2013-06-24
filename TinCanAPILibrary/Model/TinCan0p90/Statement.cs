@@ -23,6 +23,9 @@ using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
+    /// <summary>
+    /// TinCan 0.90 version of Statement
+    /// </summary>
     public class Statement : IValidatable
     {
         #region Fields
@@ -80,7 +83,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
                 else
                 {
                     string normalized = value.ToLower();
-                    if (!ValidationHelper.IsValidUUID(normalized))
+                    if (!ValidationHelper.IsValidUuid(normalized))
                     {
                         throw new ArgumentException("Statement ID must be UUID", "value");
                     }
@@ -202,7 +205,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             var failures = new List<ValidationFailure>();
             if (actor == null && verb != StatementVerb.Voided)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an actor"));
+                failures.Add(new ValidationFailure("Statement " + id + " does not have an actor", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -210,7 +213,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             }
             if (Verb == null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have a verb"));
+                failures.Add(new ValidationFailure("Statement " + id + " does not have a verb", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -218,7 +221,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             }
             if (_object == null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an object"));
+                failures.Add(new ValidationFailure("Statement " + id + " does not have an object", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
@@ -229,7 +232,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
                 bool objectStatementIdentified = (_object is TargetedStatement) && !string.IsNullOrEmpty(((TargetedStatement)_object).Id);
                 if (!objectStatementIdentified)
                 {
-                    failures.Add(new ValidationFailure("Statement " + id + " has verb 'voided' but does not properly identify a statement as its object"));
+                    failures.Add(new ValidationFailure("Statement " + id + " has verb 'voided' but does not properly identify a statement as its object", ValidationLevel.Must));
                     if (earlyReturnOnFailure)
                     {
                         return failures;
@@ -325,6 +328,8 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         #region TinCan 0.95 Promotion
         /// <summary>
         /// Promotes a TinCan 0.9 statement to a 0.95 statement.  This can be a lossy conversion.
+        /// 
+        /// TODO - deep clone rather than shallow copy
         /// </summary>
         /// <param name="source">A TinCan 0.9 Statement</param>
         /// <returns>A representation of the statement for TinCan 0.95</returns>
@@ -352,9 +357,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         #endregion
 
         #region TinCan 1.0.0 Promotion
+
+        /// <summary>
+        /// Promotes a TinCan 0.9 statement to a 1.0.0 statement.  This can be a lossy conversion.
+        /// 
+        /// TODO - deep clone rather than shallow copy
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.Statement(Statement source)
         {
-            throw new NotImplementedException(); // TODO
+            return (RusticiSoftware.TinCanAPILibrary.Model.Statement)(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)source;
         }
         #endregion
     }

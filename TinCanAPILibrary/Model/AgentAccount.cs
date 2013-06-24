@@ -18,10 +18,11 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
     /// <summary>
-    /// An agent account to verify the uniqueness of the agent
+    /// An agent account to verify the uniqueness of the agent or group
     /// </summary>
     public class AgentAccount : IValidatable
     {
@@ -32,7 +33,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <summary>
         /// The home page of the agent account
         /// </summary>
-        public string Homepage
+        public string HomePage
         {
             get { return homePage; }
             set
@@ -92,15 +93,25 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             var failures = new List<ValidationFailure>();
             if (string.IsNullOrEmpty(homePage))
             {
-                failures.Add(new ValidationFailure("Account service homepage cannot be null"));
+                failures.Add(new ValidationFailure("Account homePage cannot be null", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
                 }
             }
+            else if (!ValidationHelper.IsValidAbsoluteIri(homePage))
+            {
+                failures.Add(new ValidationFailure("Account homePage must be a valid absolute IRI.", ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
+
             if (string.IsNullOrEmpty(name))
             {
-                failures.Add(new ValidationFailure("Account name cannot be null"));
+                failures.Add(new ValidationFailure("Account name cannot be null", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;

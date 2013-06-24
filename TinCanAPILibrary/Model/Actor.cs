@@ -68,27 +68,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public string Mbox
         {
             get { return mbox; }
-            set
-            {
-                string mboxPrefix = "mailto:";
-                string normalized = value.ToLower();
-                if (normalized != null)
-                {
-                    if (!normalized.StartsWith(mboxPrefix))
-                    {
-                        throw new ArgumentException(
-                            "Mbox value " + normalized + " must begin with mailto: prefix",
-                            "value");
-                    }
-                    if (!ValidationHelper.IsValidEmailAddress(normalized.Substring(mboxPrefix.Length)))
-                    {
-                        throw new ArgumentException(
-                            "Mbox value " + normalized + " is not a valid email address.",
-                            "value");
-                    }
-                }
-                mbox = normalized;
-            }
+            set { mbox = value; }
         }
 
         /// <summary>
@@ -121,19 +101,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public AgentAccount Account
         {
             get { return account; }
-            set
-            {
-                if (value != null)
-                {
-                    // TODO - reconsider whether to deep-validate in setters
-                    var failures = new List<ValidationFailure>(value.Validate(earlyReturnOnFailure: true));
-                    if (failures.Count > 0)
-                    {
-                        throw new ArgumentException(failures[0].Error);
-                    }
-                    account = value;
-                }
-            }
+            set { account = value; }
         }
 
         #endregion
@@ -160,6 +128,31 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             this.openid = src.openid;
             this.account = src.account;
         }
+
+        protected uint NumberOfInverseFunctionalIdentifiers
+        {
+            get
+            {
+                uint properties = 0;
+                if (mbox != null)
+                {
+                    properties++;
+                }
+                if (mbox_sha1sum != null)
+                {
+                    properties++;
+                }
+                if (openid != null)
+                {
+                    properties++;
+                }
+                if (account != null)
+                {
+                    properties++;
+                }
+                return properties;
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -168,31 +161,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// </summary>
         public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
-            int properties = 0;
-            if (!string.IsNullOrEmpty(mbox))
-            {
-                properties++;
-            }
-            if (!string.IsNullOrEmpty(mbox_sha1sum))
-            {
-                properties++;
-            }
-            if (!string.IsNullOrEmpty(openid))
-            {
-                properties++;
-            }
-            if (account != null)
-            {
-                properties++;
-            }
-            if (properties != 1)
-            {
-                return new List<ValidationFailure>() 
-                { 
-                    new ValidationFailure("Exactly 1 inverse functional properties must be defined.  However, " + properties + " are defined.") 
-                };
-            }
-            return new List<ValidationFailure>();
+            return ValidateAsAgent(earlyReturnOnFailure);
         }
 
         /// <summary>
@@ -206,6 +175,48 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             return 0;
         }
 
+        #endregion
+
+        #region Protectected Methods
+
+        private IEnumerable<ValidationFailure> ValidateAsAgent(bool earlyReturnOnFailure)
+        {
+            // TODO - other features
+            return ValidateInverseFunctionalIdentifiers(earlyReturnOnFailure);
+        }
+
+        protected IEnumerable<ValidationFailure> ValidateInverseFunctionalIdentifiers(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (mbox != null && !ValidationHelper.IsValidMailtoIRI(mbox))
+            {
+                failures.Add(new ValidationFailure(string.Format("mbox must have the format 'mailto:(email address)', but was {0}", mbox), ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+            if (openid != null && !ValidationHelper.IsValidAbsoluteIri(openid))
+            {
+                failures.Add(new ValidationFailure(string.Format("If present, openid must be a valid IRI, but was {0}", openid), ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
+            if (ValidationHelper.ValidateAndAddFailures(failures, account, earlyReturnOnFailure) && earlyReturnOnFailure)
+            {
+                return failures;
+            }
+
+            var numProperties = NumberOfInverseFunctionalIdentifiers;
+            if (numProperties != 1)
+            {
+                failures.Add(new ValidationFailure("Exactly 1 inverse functional properties must be defined.  However, " + numProperties + " are defined.", ValidationLevel.Must));
+            }
+            return failures;
+        }
         #endregion
 
         #region TinCan 0.90 Conversion

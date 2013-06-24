@@ -40,8 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\ValidationHelperFixture.cs" />
     <Compile Include="JSONConverter\JSON\TinCanConverter\TinCanJsonConverterFixture.cs" />
+    <Compile Include="Model\ActorFixture.cs" />
+    <Compile Include="Model\AgentAccountFixture.cs" />
+    <Compile Include="Model\GroupFixture.cs" />
+    <Compile Include="Model\LanguageMapFixture.cs" />
     <Compile Include="Model\StatementFixture.cs" />
+    <Compile Include="Model\StatementVerbFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

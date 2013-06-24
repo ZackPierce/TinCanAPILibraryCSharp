@@ -23,6 +23,9 @@ using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
+    /// <summary>
+    /// Model corresponding to a 1.0.x Experience API Statement
+    /// </summary>
     public class Statement : StatementBase, IValidatable
     {
         private string version;
@@ -54,6 +57,8 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         #region TinCan previous versions downgrade
         /// <summary>
         /// Demotes a TinCan 1.0.0 Statement to TinCan 0.9
+        /// 
+        /// TODO - deep clone rather than shallow copy
         /// </summary>
         /// <param name="source">A TinCan 1.0.0 Statement</param>
         /// <returns>The TinCan 0.90 representation of the statement</returns>
@@ -62,11 +67,28 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// such the two instances of the statement are inextricably linked.</remarks>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement(Statement source)
         {
-            throw new NotImplementedException(); // TODO
+            var result = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement();
+            result.Id = source.Id;
+            result.Actor = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Actor)source.Actor;
+            result.Verb = ((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementVerb)source.GetVerbAsEnum()).ToString().ToLower();
+            result.InProgress = false;
+            result.Object = source.Object;
+            result.Result = source.Result;
+            result.Context = source.Context;
+            result.Timestamp = source.Timestamp;
+            if (source.Authority != null)
+            {
+                result.Authority = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Actor)source.Authority;
+            }
+            result.Voided = false; // 1.0.x has no explicit property for "Voided"
+
+            return result;
         }
 
         /// <summary>
         /// Demotes a TinCan 1.0.0 Statement to TinCan 0.95
+        /// 
+        /// TODO - deep clone rather than shallow copy
         /// </summary>
         /// <param name="source">A TinCan 1.0.0 Statement</param>
         /// <returns>The TinCan 0.95 representation of the statement</returns>
@@ -75,7 +97,18 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// such the two instances of the statement are inextricably linked.</remarks>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement(Statement source)
         {
-            throw new NotImplementedException(); // TODO
+            var downgrade = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement();
+            downgrade.Actor = source.Actor;
+            downgrade.Authority = source.Authority;
+            downgrade.Context = source.Context;
+            downgrade.Id = source.Id;
+            downgrade.Object = source.Object;
+            downgrade.Result = source.Result;
+            downgrade.Stored = source.Stored;
+            downgrade.Timestamp = source.Timestamp;
+            downgrade.Verb = source.Verb;
+            downgrade.Voided = false; // 1.0.x has no explicit property for "Voided"
+            return downgrade;
         }
         #endregion
     }

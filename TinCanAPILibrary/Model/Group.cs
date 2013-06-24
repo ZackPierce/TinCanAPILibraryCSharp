@@ -52,18 +52,37 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public override IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
-            if (member == null || member.Length == 0)
+
+            if ((member == null || member.Length == 0) && NumberOfInverseFunctionalIdentifiers == 0)
             {
-                failures.Add(new ValidationFailure("Group must be populated"));
+
+                failures.Add(new ValidationFailure("Anonymous Groups must be populated", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
                 }
+
             }
             else
             {
                 foreach (Actor a in member)
                 {
+                    if (a == null)
+                    {
+                        failures.Add(new ValidationFailure("Null items are not permitted in the member array.", ValidationLevel.Must));
+                        if (earlyReturnOnFailure)
+                        {
+                            return failures;
+                        }
+                    }
+                    if (a is Group)
+                    {
+                        failures.Add(new ValidationFailure("Groups must not contain Group Objects in the member property", ValidationLevel.Must));
+                        if (earlyReturnOnFailure)
+                        {
+                            return failures;
+                        }
+                    }
                     failures.AddRange(a.Validate(earlyReturnOnFailure));
                     if (earlyReturnOnFailure && failures.Count != 0)
                     {

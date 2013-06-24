@@ -66,6 +66,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         #region Constructor
         public Result() { }
+
         #endregion
 
         #region Public Methods

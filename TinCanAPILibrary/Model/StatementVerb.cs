@@ -16,10 +16,12 @@ limitations under the License.
 */
 #endregion
 using System;
+using System.Collections.Generic;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
-    public class StatementVerb
+    public class StatementVerb : IValidatable
     {
         private string id;
         private LanguageMap display;
@@ -108,6 +110,12 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         {
         }
 
+        /// <summary>
+        /// TODO - consider re-using ValidationHelper.IsValidAbsoluteIri instead
+        /// Note that present implementation allows Relative Uris, not permitted in 1.0.x
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         private bool IsUri(string source)
         {
             if (!string.IsNullOrEmpty(source) && Uri.IsWellFormedUriString(source, UriKind.RelativeOrAbsolute))
@@ -120,6 +128,11 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         public bool IsVoided()
         {
+            // TODO - Store this important data somewhere better than in the display property
+            if (display == null)
+            {
+                return false;
+            }
             foreach (string s in display.Values)
             {
                 if (s.ToLower().Equals("voided"))
@@ -147,6 +160,35 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             {
                 throw new ArgumentException("The verb " + verb.display["en-US"] + " has no 0.90 verb representation.", "verb");
             }
+        }
+
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (id == null)
+            {
+                failures.Add(new ValidationFailure("Verb id must not be null", ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+            if (display == null)
+            {
+                failures.Add(new ValidationFailure("The display property was null, but should be used by all Statements", ValidationLevel.Should));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+            else
+            {
+                if (ValidationHelper.ValidateAndAddFailures(failures, display, earlyReturnOnFailure))
+                {
+                    return failures;
+                }
+            }
+            return failures;
         }
     }
 

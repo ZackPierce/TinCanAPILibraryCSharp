@@ -22,6 +22,9 @@ using System.Text;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
+    /// <summary>
+    /// Collection of TinCan 0.90 Statement resulting from a retrieval call.
+    /// </summary>
     public class StatementResult
     {
         #region Fields

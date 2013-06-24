@@ -232,12 +232,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             {
                 this.Account = new AgentAccount[] { account };
             }
-            // TODO - Strongly reconsider deep validation on construction
-            var failures = new List<ValidationFailure>(this.Validate(earlyReturnOnFailure: true));
-            if (failures.Count > 0)
-            {
-                throw new ArgumentException(failures[0].Error);
-            }
         }
         /// <summary>
         /// Creates a new actor.
@@ -296,7 +290,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
                 !ValidateArray(mbox_sha1sum) && !ValidateArray(openid) &&
                 !ValidateArray(account))
             {
-                return new List<ValidationFailure>() { new ValidationFailure("At least once inverse functional property must be defined") };
+                return new List<ValidationFailure>() { new ValidationFailure("At least once inverse functional property must be defined", ValidationLevel.Must) };
             }
             return new List<ValidationFailure>();
         }
