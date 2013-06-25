@@ -18,6 +18,7 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
@@ -70,21 +71,18 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
-            if (id == null)
+            if (!ValidationHelper.IsValidAbsoluteIri(id))
             {
-                failures.Add(new ValidationFailure("Activity does not have an identifier", ValidationLevel.Must));
+                failures.Add(new ValidationFailure("Activity does not have a valid identifier. The id property must be a non-null absolute IRI", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
                 {
                     return failures;
                 }
             }
-            if (definition != null && definition is IValidatable)
+
+            if (ValidationHelper.ValidateAndAddFailures(failures, definition, earlyReturnOnFailure) && earlyReturnOnFailure)
             {
-                failures.AddRange(((IValidatable)definition).Validate(earlyReturnOnFailure));
-                if (earlyReturnOnFailure && failures.Count > 0)
-                {
-                    return failures;
-                }
+                return failures;
             }
             return failures;
         }

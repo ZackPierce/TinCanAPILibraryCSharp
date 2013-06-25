@@ -18,13 +18,17 @@ limitations under the License.
 using System;
 using System.Collections.Generic;
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
+using System.Text.RegularExpressions;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
-    public class InteractionComponent
+    public class InteractionComponent : IValidatable
     {
         private string id;
         private LanguageMap description;
+
+        private static Regex HasWhitespaceRegex = new Regex(@"\s", RegexOptions.Compiled);
 
         public string Id
         {
@@ -34,22 +38,40 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         public LanguageMap Description
         {
-            get
-            {
-                return description;
-            }
+            get { return description; }
             //Including for use by deserialization code. Do not use.
-            set
+            set { description = value; }
+        }
+
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (id == null)
             {
-                if (description == null || description.Count == 0)
+                failures.Add(new ValidationFailure("id should not be null on Interaction Components.", ValidationLevel.May));
+                if (earlyReturnOnFailure)
                 {
-                    description = value;
+                    return failures;
                 }
-                else
+            } else if (HasWhitespace(id)) {
+                failures.Add(new ValidationFailure("An interaction component's id value should not have whitespace, but was :" + id, ValidationLevel.May));
+                if (earlyReturnOnFailure)
                 {
-                    throw new InvalidOperationException("Can't overwrite populated description.");
+                    return failures;
                 }
             }
+
+            if (ValidationHelper.ValidateAndAddFailures(failures, description, earlyReturnOnFailure) && earlyReturnOnFailure)
+            {
+                return failures;
+            }
+
+            return failures;
+        }
+
+        private static bool HasWhitespace(string candidate)
+        {
+            return HasWhitespaceRegex.IsMatch(candidate);
         }
     }
 }

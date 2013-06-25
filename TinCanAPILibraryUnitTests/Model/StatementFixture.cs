@@ -58,7 +58,7 @@ namespace TinCanAPILibraryUnitTests.Model
             statement = CreateSimpleValidStatement();
             var failures = statement.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(failures);
-            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 0);
+            Assert.AreEqual(0, new List<ValidationFailure>(failures).Count);
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace TinCanAPILibraryUnitTests.Model
             statement.Id = null;
             var failures = statement.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(failures);
-            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 1);
+            Assert.AreEqual(1, new List<ValidationFailure>(failures).Count);
         }
 
         [Test]
@@ -78,7 +78,7 @@ namespace TinCanAPILibraryUnitTests.Model
             statement.Id = "Not a proper UUID";
             var failures = statement.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(failures);
-            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 1);
+            Assert.AreEqual(1, new List<ValidationFailure>(failures).Count);
         }
 
         [Test]
@@ -88,15 +88,16 @@ namespace TinCanAPILibraryUnitTests.Model
             statement.Id = "E1EEC41F-1E93-4ED6-ACBF-5C4BD0C24269";
             var failures = statement.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(failures);
-            Assert.AreEqual(new List<ValidationFailure>(failures).Count, 0);
+            Assert.AreEqual(0, new List<ValidationFailure>(failures).Count);
         }
 
         private static Statement CreateSimpleValidStatement()
         {
             var activity = new Activity("http://www.example.com");
             activity.Definition = new ActivityDefinition();
+            activity.Definition.Type = new Uri("http://example.com/types/activityTypeA");
             activity.Definition.Name = new LanguageMap();
-            activity.Definition.Name.Add("en-US", "TCAPI C# 0.95 Library.");
+            activity.Definition.Name.Add("en-US", "TCAPI C# 1.0.0 Library.");
             return new Statement(
                     new Actor("Example", "mailto:test@example.com"),
                     new StatementVerb("http://example.com/doSomething", "en-US", "Do something"),

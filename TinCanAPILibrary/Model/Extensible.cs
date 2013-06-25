@@ -17,6 +17,7 @@ limitations under the License.
 #endregion
 using System;
 using System.Collections.Generic;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
@@ -25,7 +26,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     /// Allows for arbitrary key/value pairs to be attached to
     /// an object.
     /// </summary>
-    public class Extensible
+    public abstract class Extensible
     {
         private Dictionary<Uri, object> extensions;
         
@@ -39,6 +40,26 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         public Extensible(Extensible extensible)
         {
             this.extensions = extensible.extensions;
+        }
+
+        public List<ValidationFailure> ValidateExtensions(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (extensions != null)
+            {
+                foreach (var kvp in this.extensions)
+                {
+                    if (!ValidationHelper.IsValidAbsoluteIri(kvp.Key.ToString()))
+                    {
+                        failures.Add(new ValidationFailure("Extension object keys must be absolute IRIs, but instead found a property named: " + kvp.Key, ValidationLevel.Must));
+                        if (earlyReturnOnFailure)
+                        {
+                            return failures;
+                        }
+                    }
+                }
+            }
+            return failures;
         }
     }
 }

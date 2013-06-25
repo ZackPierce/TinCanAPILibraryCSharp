@@ -117,75 +117,59 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <param name="vocab">The value to instantiate this class with</param>
         public InteractionType(string vocab)
         {
+            this.Value = ValueFromString(vocab);
+        }
+
+        public static InteractionTypeValue ValueFromString(string vocab)
+        {
             switch (vocab.ToLowerInvariant().Trim())
             {
                 case "":
-                    this.Value = InteractionTypeValue.Undefined;
-                    break;
+                    return InteractionTypeValue.Undefined;
                 case "true-false":
-                    this.Value = InteractionTypeValue.TrueFalse;
-                    break;
+                    return InteractionTypeValue.TrueFalse;
                 case "choice":
-                    this.Value = InteractionTypeValue.Choice;
-                    break;
+                    return InteractionTypeValue.Choice;
                 case "fill-in":
-                    this.Value = InteractionTypeValue.FillIn;
-                    break;
+                    return InteractionTypeValue.FillIn;
                 case "long-fill-in":
-                    this.Value = InteractionTypeValue.LongFillIn;
-                    break;
+                    return InteractionTypeValue.LongFillIn;
                 case "likert":
-                    this.Value = InteractionTypeValue.Likert;
-                    break;
+                    return InteractionTypeValue.Likert;
                 case "matching":
-                    this.Value = InteractionTypeValue.Matching;
-                    break;
+                    return InteractionTypeValue.Matching;
                 case "performance":
-                    this.Value = InteractionTypeValue.Performance;
-                    break;
+                    return InteractionTypeValue.Performance;
                 case "sequencing":
-                    this.Value = InteractionTypeValue.Sequencing;
-                    break;
+                    return InteractionTypeValue.Sequencing;
                 case "numeric":
-                    this.Value = InteractionTypeValue.Numeric;
-                    break;
+                    return InteractionTypeValue.Numeric;
                 case "other":
-                    this.Value = InteractionTypeValue.Other;
-                    break;
+                    return InteractionTypeValue.Other;
                 default:
 
                     // Try out AICC cases
                     switch (vocab.Substring(0, 1).ToLowerInvariant())
                     {
                         case "t":
-                            this.Value = InteractionTypeValue.TrueFalse;
-                            break;
+                            return InteractionTypeValue.TrueFalse;
                         case "c":
-                            this.Value = InteractionTypeValue.Choice;
-                            break;
+                            return InteractionTypeValue.Choice;
                         case "f":
-                            this.Value = InteractionTypeValue.FillIn;
-                            break;
+                            return InteractionTypeValue.FillIn;
                         case "m":
-                            this.Value = InteractionTypeValue.Matching;
-                            break;
+                            return InteractionTypeValue.Matching;
                         case "p":
-                            this.Value = InteractionTypeValue.Performance;
-                            break;
+                            return InteractionTypeValue.Performance;
                         case "s":
-                            this.Value = InteractionTypeValue.Sequencing;
-                            break;
+                            return InteractionTypeValue.Sequencing;
                         case "l":
-                            this.Value = InteractionTypeValue.Likert;
-                            break;
+                            return InteractionTypeValue.Likert;
                         case "n":
-                            this.Value = InteractionTypeValue.Numeric;
-                            break;
-
+                            return InteractionTypeValue.Numeric;
                         default:
-                            throw new ArgumentException("The value " + vocab + " is not valid.", "vocab");
+                            return InteractionTypeValue.Undefined;
                     }
-                    break;
             }
         }
 

@@ -21,6 +21,7 @@ using System.Text;
 using System.Collections;
 using RusticiSoftware.TinCanAPILibrary.Json;
 using RusticiSoftware.TinCanAPILibrary.Model;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary
 {
@@ -45,14 +46,15 @@ namespace RusticiSoftware.TinCanAPILibrary
             //Avoid infinite loop here, if type is this base class
             Type targetType = typeof(ActivityDefinition_JsonTarget);
 
-            if (typeField != null)
+            string interactionTypeField = null;
+            if (objMap.Contains("interactionType"))
             {
-                Uri activityType = new Uri((string)objMap["type"]);
+                interactionTypeField = (string)objMap["interactionType"];
+            }
 
-                if (activityType.Equals("http://adlnet.gov/expapi/activities/cmi.interaction"))
-                {
-                    targetType = typeof(InteractionDefinition);
-                }
+            if (typeField == Constants.CmiInteractionActivityType || Constants.CmiInteractionTypes.Contains(interactionTypeField))
+            {
+                targetType = typeof(InteractionDefinition);
             }
 
             return converter.DeserializeJSON(value, targetType);

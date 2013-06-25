@@ -183,7 +183,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             }
             else
             {
-                if (ValidationHelper.ValidateAndAddFailures(failures, display, earlyReturnOnFailure))
+                if (ValidationHelper.ValidateAndAddFailures(failures, display, earlyReturnOnFailure) && earlyReturnOnFailure)
                 {
                     return failures;
                 }

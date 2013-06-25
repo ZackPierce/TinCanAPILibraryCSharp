@@ -150,5 +150,22 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
             outputFailures.AddRange(target.Validate(earlyReturnOnFailure));
             return cachedLength != outputFailures.Count;
         }
+
+        internal static bool AddFailureIfContainsNullMembers<T>(List<ValidationFailure> outputFailures, IEnumerable<T> collection, ValidationLevel level, bool earlyReturnOnFailure) where T : class
+        {
+            if (collection == null)
+            {
+                return false;
+            }
+            foreach (var item in collection)
+            {
+                if (item == null)
+                {
+                    outputFailures.Add(new ValidationFailure("null members are not permitted in collections derived from JSON Arrays in the raw Statement", level));
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

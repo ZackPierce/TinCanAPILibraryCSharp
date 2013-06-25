@@ -25,7 +25,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     /// <summary>
     /// Definition of an activity, a core statement piece.
     /// </summary>
-    public class ActivityDefinition : Extensible
+    public class ActivityDefinition : Extensible, IValidatable
     {
         /// <summary>
         /// A collection of language codes and their activity name.
@@ -56,6 +56,14 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         {
             get { return type; }
             set { type = value; }
+        }
+
+        private Uri moreInfo;
+
+        public Uri MoreInfo
+        {
+            get { return moreInfo; }
+            set { moreInfo = value; }
         }
 
         private string interactionType;
@@ -106,6 +114,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             this.Description = activityDefinition.Description;
             this.Type = activityDefinition.Type;
             this.InteractionType = activityDefinition.InteractionType;
+            this.moreInfo = activityDefinition.moreInfo;
         }
 
         public virtual bool Update(ActivityDefinition def)
@@ -116,19 +125,20 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 return false;
             }
 
-            if (/*def.Type != null &&*/ !def.type.Equals(this.type))
+            if (def.Type != null && !def.type.Equals(this.type))
             {
                 this.Type = def.Type;
                 updated = true;
             }
+
             if (def.Name != null && def.Name.Count > 0 && !CommonFunctions.AreDictionariesEqual(this.name, def.name))
             {
-                this.name = def.Name;
+                this.name = CommonFunctions.Merge<LanguageMap, string, string>(this.name, def.Name);
                 updated = true;
             }
             if (def.description != null && def.description.Count > 0 && !CommonFunctions.AreDictionariesEqual(this.description, def.description))
             {
-                this.description = def.Description;
+                this.description = CommonFunctions.Merge<LanguageMap, string, string>(this.description, def.description);
                 updated = true;
             }
             if (def.InteractionType != null && !def.InteractionType.Equals(this.InteractionType))
@@ -137,7 +147,58 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 updated = true;
             }
 
+            if (def.moreInfo != null && !def.moreInfo.Equals(this.moreInfo))
+            {
+                this.moreInfo = def.moreInfo;
+                updated = true;
+            }
+
             return updated;
+        }
+
+        public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (ValidationHelper.ValidateAndAddFailures(failures, this.name, earlyReturnOnFailure) && earlyReturnOnFailure)
+            {
+                return failures;
+            }
+
+            if (ValidationHelper.ValidateAndAddFailures(failures, this.description, earlyReturnOnFailure) && earlyReturnOnFailure)
+            {
+                return failures;
+            }
+
+            if (this.type == null)
+            {
+                failures.Add(new ValidationFailure("The type property was null, but is recommended to be a non-null absolute IRI string.", ValidationLevel.BestPractice));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+            else if (!ValidationHelper.IsValidAbsoluteIri(this.type.ToString()))
+            {
+                failures.Add(new ValidationFailure("The type property, if present, must be an absolute IRI string.", ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
+            if (this.moreInfo != null && !ValidationHelper.IsValidAbsoluteIri(this.moreInfo.ToString()))
+            {
+                // TODO - IRL check on top of IRI check
+                failures.Add(new ValidationFailure("The type property, if present, must be an absolute IRL string.", ValidationLevel.Must));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+
+            failures.AddRange(this.ValidateExtensions(earlyReturnOnFailure));
+
+            return failures;
         }
     }
 }

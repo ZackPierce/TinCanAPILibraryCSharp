@@ -66,7 +66,16 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
             return true;
         }
 
-        public static bool AreListsEqual<T>(IList<T> col1, IList<T> col2)
+        /// <summary>
+        /// Checks whether both lists are null, have the same Count,
+        /// and all items in col1 can be found via Contains
+        /// in col2.  Item order and mulitplicity are not checked.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="col1"></param>
+        /// <param name="col2"></param>
+        /// <returns></returns>
+        public static bool AreListsEqualIgnoringOrder<T>(IList<T> col1, IList<T> col2)
         {
             if (col1 == null || col2 == null)
             {
@@ -86,6 +95,42 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// If the first parameter, <code>target</code> is not null, adds the contents 
+        /// of the second parameter, <code>source</code> to <code>target</code> and returns
+        /// the <code>target</code> intance.  Pre-existing values with the same key will
+        /// be overwritten with the data from <code>source</code>.
+        /// 
+        /// If the first parameter, <code>target</code>, is null, returns a new object
+        /// containing the contents of the second parameter.
+        /// </summary>
+        /// <typeparam name="D"></typeparam>
+        /// <typeparam name="K"></typeparam>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="target"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        internal static D Merge<D, K, V>(D target, D source) where D : IDictionary<K, V>, new()
+        {
+            if (source == null)
+            {
+                return target;
+            }
+
+            var merged = target;
+            if (target == null)
+            {
+                merged = new D();
+            }
+
+            foreach (var kvp in source)
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+            return merged;
+
         }
     }
 }

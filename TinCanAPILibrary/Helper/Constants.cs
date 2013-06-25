@@ -16,15 +16,27 @@ limitations under the License.
 */
 #endregion
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace RusticiSoftware.TinCanAPILibrary.Helper
 {
-    public class Constants
+    public static class Constants
     {
         /// <summary>
         /// ISO8601 date format, suitable as parameter to DateTime.ToString()
         /// </summary>
         public const string ISO8601_DATE_FORMAT = "yyyy-MM-ddTHH:mm:ss.fffZ";
+
+        public static readonly ReadOnlyCollection<string> CmiInteractionTypes = new ReadOnlyCollection<string>(new List<string>()
+        {
+            "true-false", "choice", "fill-in",
+            "long-fill-in", "matching", "performance",
+            "sequencing", "likert", "numeric",
+            "other"
+        });
+
+        public const string CmiInteractionActivityType = "http://adlnet.gov/expapi/activities/cmi.interaction";
     }
 
     /// <summary>
