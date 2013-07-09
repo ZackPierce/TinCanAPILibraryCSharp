@@ -22,7 +22,7 @@ using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
-    public class Actor : StatementTarget, IValidatable
+    public class Actor : IStatementTarget
     {
         #region Constants
         protected static readonly string OBJECT_TYPE = "Agent";
@@ -45,7 +45,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <summary>
         /// ObjectType accessor
         /// </summary>
-        public override string ObjectType
+        public virtual string ObjectType
         {
             get { return OBJECT_TYPE; }
         }
@@ -181,11 +181,10 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         private IEnumerable<ValidationFailure> ValidateAsAgent(bool earlyReturnOnFailure)
         {
-            // TODO - other features
             return ValidateInverseFunctionalIdentifiers(earlyReturnOnFailure);
         }
 
-        protected IEnumerable<ValidationFailure> ValidateInverseFunctionalIdentifiers(bool earlyReturnOnFailure)
+        protected List<ValidationFailure> ValidateInverseFunctionalIdentifiers(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
             if (mbox != null && !ValidationHelper.IsValidMailtoIRI(mbox))

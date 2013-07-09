@@ -26,7 +26,7 @@ namespace RusticiSoftware.TinCanAPILibrary
 {
     public class TinCanStatementTargetJsonConverter : IJsonTypeConverter
     {
-        private Type myType = typeof(TinCanAPILibrary.Model.StatementTarget);
+        private Type myType = typeof(TinCanAPILibrary.Model.IStatementTarget);
         public Type GetTargetClass()
         {
             return myType;
@@ -42,8 +42,8 @@ namespace RusticiSoftware.TinCanAPILibrary
                 typeField = (string)objMap["objectType"];
             }
 
-            TypeFieldJsonHelper typeFieldHelper = new TypeFieldJsonHelper();
-            Type targetType = typeFieldHelper.GetTypeFromString(typeField, typeof(Activity));
+
+            Type targetType = TypeFieldJsonHelper.GetTypeFromString(typeField, typeof(Activity));
             return converter.DeserializeJSON(value, targetType);
         }
 

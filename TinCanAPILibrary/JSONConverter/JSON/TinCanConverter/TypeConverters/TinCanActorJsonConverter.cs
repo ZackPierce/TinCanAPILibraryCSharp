@@ -42,8 +42,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                 typeField = (string)objMap["objectType"];
             }
 
-            TypeFieldJsonHelper typeFieldHelper = new TypeFieldJsonHelper();
-            Type targetType = typeFieldHelper.GetTypeFromString(typeField, typeof(Actor));
+            Type targetType = TypeFieldJsonHelper.GetTypeFromString(typeField, typeof(Actor));
 
             //Avoid infinite loop here, if type is this base class
             if (targetType.Equals(typeof(Actor)))

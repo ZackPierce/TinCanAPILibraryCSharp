@@ -50,10 +50,12 @@ namespace RusticiSoftware.TinCanAPILibrary
 
         public TinCanJsonConverter() : base()
         {
+            // TODO - investigate "Java side" references found in legacy comments below.
             //on the Java side we need to register default converters for concrete subclasses of 
             //interfaces and abstract classes registered with a custom converter
 
-            this.RegisterTypeConverter(typeof(TinCanAPILibrary.Model.StatementTarget), new TinCanStatementTargetJsonConverter());
+            this.RegisterTypeConverter(typeof(TinCanAPILibrary.Model.IStatementTarget), new TinCanStatementTargetJsonConverter());
+            this.RegisterTypeConverter(typeof(ContextActivities), new ContextActivitiesConverter());
             this.RegisterDefaultConverter(typeof(Activity));
             this.RegisterDefaultConverter(typeof(StatementRef));
 
@@ -68,7 +70,11 @@ namespace RusticiSoftware.TinCanAPILibrary
             this.RegisterDefaultConverter(typeof(ActivityDefinitionConverter.ActivityDefinition_JsonTarget));
             this.RegisterDefaultConverter(typeof(InteractionDefinition));
 
-            // TinCan 90
+            // TinCan 0.95
+            this.RegisterDefaultConverter(typeof(Model.TinCan0p95.Statement));
+            this.RegisterDefaultConverter(typeof(Model.TinCan0p95.StatementResult));
+
+            // TinCan 0.90
             this.RegisterDefaultConverter(typeof(Model.TinCan0p90.Actor));
             this.RegisterDefaultConverter(typeof(Model.TinCan0p90.Person));
             this.RegisterDefaultConverter(typeof(Model.TinCan0p90.TargetedStatement));

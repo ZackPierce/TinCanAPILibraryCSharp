@@ -22,13 +22,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
     using System.Collections.Generic;
         using System.Text;
     using RusticiSoftware.TinCanAPILibrary.Model;
+    using RusticiSoftware.TinCanAPILibrary.Helper;
 
     /// <summary>
     /// Tin Can 0.95 version of Statement
     /// </summary>
-    public class Statement : StatementBase
+    public class Statement : StatementBase, IValidatable
     {
+        #region Fields
         private NullableBoolean voided;
+        private Context context;
+        #endregion
 
         /// <summary>
         /// 
@@ -38,6 +42,68 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
             get { return voided; }
             set { voided = value; }
         }
+
+        /// <summary>
+        /// TinCan 0.95 Context information for this statement
+        /// </summary>
+        public Context Context
+        {
+            get { return context; }
+            set { context = value; }
+        }
+
+        #region Public Methods
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = base.validateImplementation(earlyReturnOnFailure);
+            if (earlyReturnOnFailure && failures.Count > 0)
+            {
+                return failures;
+            }
+
+            if (ValidationHelper.ValidateAndAddFailures(failures, context, earlyReturnOnFailure) && earlyReturnOnFailure)
+            {
+                return failures;
+            }
+            return failures;
+        }
+
+        #endregion
+
+        #region Legacy
+        /// <summary>
+        /// Handles verbs with special requirements
+        /// TODO - Legacy Cleanup - find out where the requirements are listed and what versions they are relevant under.
+        /// </summary>
+        public void HandleSpecialVerbs()
+        {
+            if (this.Verb == null)
+            {
+                return;
+            }
+            if (this.Verb.Equals("passed"))
+            {
+                Result = (Result == null) ? new Result() : Result;
+                VerifySuccessAndCompletionValues(Result, "passed", true, true);
+                Result.Success = true;
+                Result.Completion = true;
+            }
+            else if (this.Verb.Equals("failed"))
+            {
+                Result = (Result == null) ? new Result() : Result;
+                VerifySuccessAndCompletionValues(Result, "failed", false, true);
+                Result.Success = false;
+                Result.Completion = true;
+            }
+            else if (this.Verb.Equals("completed"))
+            {
+                Result = (Result == null) ? new Result() : Result;
+                VerifyCompletionValue(Result, "completed", true);
+                Result.Completion = true;
+            }
+        }
+
+        #endregion
 
         #region TinCan 0.90 Downgrade
         /// <summary>
@@ -50,10 +116,14 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
         /// such the two instances of the statement are inextricably linked.</remarks>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement(Statement source)
         {
+            if (source == null)
+            {
+                return null;
+            }
             var result = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Statement();
             result.Id = source.Id;
             result.Actor = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.Actor)source.Actor;
-            result.Verb = ((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementVerb)source.GetVerbAsEnum()).ToString().ToLower();
+            result.Verb = ((PredefinedVerb)source.Verb);
             result.InProgress = false;
             result.Object = source.Object;
             result.Result = source.Result;
@@ -72,10 +142,14 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95
         #region TinCan 1.0.0 upgrade
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.Statement(Statement source)
         {
+            if (source == null)
+            {
+                return null;
+            }
             var upgrade = new RusticiSoftware.TinCanAPILibrary.Model.Statement();
             upgrade.Actor = source.Actor;
             upgrade.Authority = source.Authority;
-            upgrade.Context = source.Context;
+            upgrade.Context = (RusticiSoftware.TinCanAPILibrary.Model.Context)source.Context;
             upgrade.Id = source.Id;
             upgrade.Object = source.Object;
             upgrade.Result = source.Result;

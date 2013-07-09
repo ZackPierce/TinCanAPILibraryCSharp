@@ -37,6 +37,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Json
 
         public void RegisterDefaultConverter(Type objectType)
         {
+            // TODO - investigate "Java side" references found in legacy comments below.
             //Do nothing, this method is needed on Java side for concrete subclasses of 
             //interfaces and abstract classes registered with a custom converter
         }

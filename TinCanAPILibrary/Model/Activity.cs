@@ -22,7 +22,7 @@ using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
-    public class Activity : StatementTarget, IValidatable
+    public class Activity : IStatementTarget
     {
         #region Constants
         protected static readonly string OBJECT_TYPE = "Activity";
@@ -34,7 +34,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         #endregion
 
         #region Properties
-        public override string ObjectType
+        public string ObjectType
         {
             get { return OBJECT_TYPE; }
         }
@@ -59,16 +59,10 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         {
             this.id = id;
         }
-
-        public Activity(string id, ActivityDefinition definition)
-        {
-            this.id = id;
-            this.definition = definition;
-        }
         #endregion
 
         #region Public Methods
-        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
             if (!ValidationHelper.IsValidAbsoluteIri(id))
@@ -87,5 +81,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             return failures;
         }
         #endregion
+
     }
 }

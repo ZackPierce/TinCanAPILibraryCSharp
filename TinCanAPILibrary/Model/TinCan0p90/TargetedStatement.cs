@@ -22,7 +22,7 @@ using System.Text;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
-    public class TargetedStatement : StatementTarget
+    public class TargetedStatement : IStatementTarget
     {
         #region Constants
         protected static readonly string OBJECT_TYPE = "Statement";
@@ -38,7 +38,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             get { return id; }
             set { id = value; }
         }
-        public override string ObjectType
+        public string ObjectType
         {
             get { return OBJECT_TYPE; }
         }
@@ -48,6 +48,22 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         public TargetedStatement(string id)
         {
             this.id = id;
+        }
+        #endregion
+
+        #region Public Methods
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        {
+            var failures = new List<ValidationFailure>();
+            if (id == null)
+            {
+                failures.Add(new ValidationFailure(string.Format("TargetedStatement had a null id property. Id should be a string.", id), ValidationLevel.Should));
+                if (earlyReturnOnFailure)
+                {
+                    return failures;
+                }
+            }
+            return failures;
         }
         #endregion
     }

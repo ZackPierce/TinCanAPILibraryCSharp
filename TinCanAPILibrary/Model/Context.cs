@@ -15,71 +15,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #endregion
-using System;
-using System.Collections.Generic;
-
-using System.Text;
-using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+    using RusticiSoftware.TinCanAPILibrary.Helper;
+
     /// <summary>
     /// Class represents the context of a TinCan Statement
     /// </summary>
-    public class Context : Extensible, IValidatable
+    public class Context : ContextBase, IValidatable
     {
         #region Fields
-        private string registration;
-        private Actor instructor;
-        private Actor team;
         private ContextActivities contextActivities;
-        private string revision;
-        private string platform;
-        private Statement statement;
+        private StatementRef statement;
         #endregion
 
         #region Properties
-        /// <summary>
-        /// The Registration UUID
-        /// </summary>
-        public string Registration
-        {
-            get { return registration; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    registration = null;
-                }
-                else
-                {
-                    string normalized = value.ToLower();
-                    if (!ValidationHelper.IsValidUuid(normalized))
-                    {
-                        throw new ArgumentException("Registration must be UUID", "value");
-                    }
-                    registration = normalized;
-                }
-            }
-        }
 
-        /// <summary>
-        /// The instructor in this context
-        /// </summary>
-        public Actor Instructor
-        {
-            get { return instructor; }
-            set { instructor = value; }
-        }
-
-        /// <summary>
-        /// The team in this context
-        /// </summary>
-        public Actor Team
-        {
-            get { return team; }
-            set { team = value; }
-        }
 
         /// <summary>
         /// The Activities in this Context
@@ -91,27 +46,9 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         }
 
         /// <summary>
-        /// The revision
+        /// Another Statement, which should be considered as context for this Statement.
         /// </summary>
-        public string Revision
-        {
-            get { return revision; }
-            set { revision = value; }
-        }
-
-        /// <summary>
-        /// The platform
-        /// </summary>
-        public string Platform
-        {
-            get { return platform; }
-            set { platform = value; }
-        }
-
-        /// <summary>
-        /// The statement
-        /// </summary>
-        public Statement Statement
+        public StatementRef Statement
         {
             get { return statement; }
             set { statement = value; }
@@ -128,25 +65,44 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// </summary>
         public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
-            object[] children = new object[] 
-            { 
-                registration, instructor, team, 
-                contextActivities, revision, platform, statement 
-            };
-            var failures = new List<ValidationFailure>();
-            foreach (object o in children)
+            var failures = base.validateImplementation(earlyReturnOnFailure);
+            if (earlyReturnOnFailure && failures.Count > 0)
             {
-                if (o != null && o is IValidatable)
+                return failures;
+            }
+
+            foreach (var validatableKid in new IValidatable[] { contextActivities, statement })
+            {
+                if (ValidationHelper.ValidateAndAddFailures(failures, validatableKid, earlyReturnOnFailure) && earlyReturnOnFailure)
                 {
-                    failures.AddRange(((IValidatable)o).Validate(earlyReturnOnFailure));
-                    if (failures.Count > 0)
-                    {
-                        return failures;
-                    }
+                    return failures;
                 }
             }
+
             return failures;
         }
+        #endregion
+
+        #region Version Conversion
+        /// <summary>
+        /// Downgrades a TinCan 1.0.0 context to a 0.95 context.
+        /// 
+        /// TODO - deep clone rather than shallow copy
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Context(Context source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+            var downgrade = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Context();
+            ContextBase.TransferProperties(source, downgrade);
+            downgrade.ContextActivities = (RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.ContextActivities)source.ContextActivities;
+            return downgrade;
+        }
+
         #endregion
     }
 }

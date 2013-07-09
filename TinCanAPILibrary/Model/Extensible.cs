@@ -29,7 +29,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     public abstract class Extensible
     {
         private Dictionary<Uri, object> extensions;
-        
+
         public Dictionary<Uri, object> Extensions
         {
             get { return extensions; }
@@ -42,24 +42,26 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             this.extensions = extensible.extensions;
         }
 
-        public List<ValidationFailure> ValidateExtensions(bool earlyReturnOnFailure)
+        internal bool AddExtensionValidationResults(List<ValidationFailure> outputFailures, bool earlyReturnOnFailure)
         {
-            var failures = new List<ValidationFailure>();
-            if (extensions != null)
+            if (extensions == null)
             {
-                foreach (var kvp in this.extensions)
+                return false;
+            }
+            bool foundError = false;
+            foreach (var kvp in this.extensions)
+            {
+                if (!ValidationHelper.IsValidAbsoluteIri(kvp.Key.ToString()))
                 {
-                    if (!ValidationHelper.IsValidAbsoluteIri(kvp.Key.ToString()))
+                    outputFailures.Add(new ValidationFailure("Extension object keys must be absolute IRIs, but instead found a property named: " + kvp.Key, ValidationLevel.Must));
+                    if (earlyReturnOnFailure)
                     {
-                        failures.Add(new ValidationFailure("Extension object keys must be absolute IRIs, but instead found a property named: " + kvp.Key, ValidationLevel.Must));
-                        if (earlyReturnOnFailure)
-                        {
-                            return failures;
-                        }
+                        return true;
                     }
+                    foundError = true;
                 }
             }
-            return failures;
+            return foundError;
         }
     }
 }

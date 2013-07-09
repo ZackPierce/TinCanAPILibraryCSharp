@@ -22,7 +22,7 @@ using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 {
-    public class Actor : StatementTarget, IValidatable
+    public class Actor : IStatementTarget, IValidatable
     {
         #region Constants
         protected static readonly string OBJECT_TYPE = "Agent";
@@ -45,7 +45,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// <summary>
         /// ObjectType accessor
         /// </summary>
-        public override string ObjectType
+        public virtual string ObjectType
         {
             get { return OBJECT_TYPE; }
         }
@@ -197,12 +197,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             this.mbox_sha1sum = mbox_sha1sum;
             this.openid = openid;
             this.account = account;
-            // TODO - Strongly reconsider deep validation on construction
-            var failures = new List<ValidationFailure>(this.Validate(earlyReturnOnFailure: true));
-            if (failures.Count > 0)
-            {
-                throw new ArgumentException(failures[0].Error);
-            }
         }
         /// <summary>
         /// Creates a new actor.
@@ -258,12 +252,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
             this.mbox_sha1sum = mbox_sha1sum;
             this.openid = openid;
             this.account = account;
-            // TODO - Strongly reconsider deep validation on construction
-            var failures = new List<ValidationFailure>(this.Validate(earlyReturnOnFailure: true));
-            if (failures.Count > 0)
-            {
-                throw new ArgumentException(failures[0].Error);
-            }
         }
 
         /// <summary>
@@ -281,10 +269,11 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         #endregion
 
         #region Public Methods
+
         /// <summary>
         /// Validates that the object abides by its rules
         /// </summary>
-        public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             if (!ValidateArray(name) && !ValidateArray(mbox) &&
                 !ValidateArray(mbox_sha1sum) && !ValidateArray(openid) &&

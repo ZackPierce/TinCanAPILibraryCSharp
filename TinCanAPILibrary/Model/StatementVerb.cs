@@ -26,6 +26,19 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         private string id;
         private LanguageMap display;
 
+        private const string ExperiencedId = "http://adlnet.gov/expapi/verbs/experienced";
+        private const string AttendedId = "http://adlnet.gov/expapi/verbs/attended";
+        private const string AttemptedId = "http://adlnet.gov/expapi/verbs/attempted";
+        private const string CompletedId = "http://adlnet.gov/expapi/verbs/completed";
+        private const string PassedId = "http://adlnet.gov/expapi/verbs/passed";
+        private const string FailedId = "http://adlnet.gov/expapi/verbs/failed";
+        private const string AnsweredId = "http://adlnet.gov/expapi/verbs/answered";
+        private const string InteractedId = "http://adlnet.gov/expapi/verbs/interacted";
+        private const string ImportedId = "http://adlnet.gov/expapi/verbs/imported";
+        private const string CreatedId = "http://adlnet.gov/expapi/verbs/created";
+        private const string SharedId = "http://adlnet.gov/expapi/verbs/shared";
+        private const string VoidedId = "http://adlnet.gov/expapi/verbs/voided";
+
         public string Id
         {
             get { return id; }
@@ -92,23 +105,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// Creates a Statement Verb from the predefined list of verbs
         /// </summary>
         /// <param name="verb"></param>
-        public StatementVerb(PredefinedVerbs verb)
+        public StatementVerb(PredefinedVerb verb)
         {
-            this.id = "http://adlnet.gov/expapi/verbs/" + verb.ToString().ToLower();
+            
             this.display = new LanguageMap();
-            this.display["en-US"] = verb.ToString().ToLower();
+            if (verb != PredefinedVerb.None)
+            {
+                this.id = "http://adlnet.gov/expapi/verbs/" + verb.ToString().ToLower();
+                this.display["en-US"] = verb.ToString().ToLower();
+            }
         }
 
-        /// <summary>
-        /// Creates a statement verb from the 0.90 set of verbs.
-        /// </summary>
-        /// <param name="verb"></param>
-        /// <remarks>You really shouldn't be using this method.  It's simply used as an easy way to promote the
-        /// verb enum to the verb class.</remarks>
-        public StatementVerb(Model.TinCan0p90.StatementVerb verb)
-            : this((PredefinedVerbs)Enum.Parse(typeof(PredefinedVerbs), verb.ToString(), true))
-        {
-        }
 
         /// <summary>
         /// TODO - consider re-using ValidationHelper.IsValidAbsoluteIri instead
@@ -128,7 +135,10 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         public bool IsVoided()
         {
-            // TODO - Store this important data somewhere better than in the display property
+            if (id == VoidedId)
+            {
+                return true;
+            }
             if (display == null)
             {
                 return false;
@@ -146,20 +156,24 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <summary>
         /// Demotes a 0.95 verb to a 0.90 verb.
         /// </summary>
-        /// <param name="verb">A 0.95 verb.  It MUST have an en-US entry in the display field.</param>
+        /// <param name="verb">A 0.95 verb.  It MUST have an id or an en-US entry in the display field.</param>
         /// <returns></returns>
-        /// <remarks>If no en-US entry is in the display map, this method will always fail and throw an exception.
+        /// <remarks>If no valid id or en-US entry is in the display map, this method will return PredefinedVerb.Undefined.
         /// The core verbs from 0.90 are adl provided verbs in 0.95 to maintain some form of verb mapping.</remarks>
-        public static explicit operator Model.TinCan0p90.StatementVerb(StatementVerb verb)
+        public static explicit operator PredefinedVerb(StatementVerb verb)
         {
-            try
+            var enumById = ParsePredefinedVerb(verb.id);
+            if (enumById != PredefinedVerb.None)
             {
-                return (Model.TinCan0p90.StatementVerb)Enum.Parse(typeof(Model.TinCan0p90.StatementVerb), verb.display["en-US"], true);
+                return enumById;
             }
-            catch (ArgumentException)
+
+            string foundEnUs;
+            if (verb.display != null && verb.display.TryGetValue("en-US", out foundEnUs))
             {
-                throw new ArgumentException("The verb " + verb.display["en-US"] + " has no 0.90 verb representation.", "verb");
+                return ParsePredefinedVerb(foundEnUs);
             }
+            return PredefinedVerb.None;
         }
 
         public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
@@ -190,21 +204,55 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
             }
             return failures;
         }
-    }
 
-    public enum PredefinedVerbs
-    {
-        Experienced,
-        Attended,
-        Attempted,
-        Completed,
-        Passed,
-        Failed,
-        Answered,
-        Interacted,
-        Imported,
-        Created,
-        Shared,
-        Voided,
+        internal static PredefinedVerb ParsePredefinedVerb(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return PredefinedVerb.None;
+            }
+
+            switch (text.ToLowerInvariant())
+            {
+                case "experienced":
+                case ExperiencedId:
+                    return PredefinedVerb.Experienced;
+                case "attended":
+                case AttendedId:
+                    return PredefinedVerb.Attended;
+                case "attempted":
+                case AttemptedId:
+                    return PredefinedVerb.Attempted;
+                case "completed":
+                case CompletedId:
+                    return PredefinedVerb.Completed;
+                case "passed":
+                case PassedId:
+                    return PredefinedVerb.Passed;
+                case "failed":
+                case FailedId:
+                    return PredefinedVerb.Failed;
+                case "answered":
+                case AnsweredId:
+                    return PredefinedVerb.Answered;
+                case "interacted":
+                case InteractedId:
+                    return PredefinedVerb.Interacted;
+                case "imported":
+                case ImportedId:
+                    return PredefinedVerb.Imported;
+                case "created":
+                case CreatedId:
+                    return PredefinedVerb.Created;
+                case "shared":
+                case SharedId:
+                    return PredefinedVerb.Shared;
+                case "voided":
+                case VoidedId:
+                    return PredefinedVerb.Voided;
+                default:
+                    return PredefinedVerb.None;
+            }
+        }
     }
 }

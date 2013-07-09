@@ -22,9 +22,9 @@ using RusticiSoftware.TinCanAPILibrary.Model;
 
 namespace RusticiSoftware.TinCanAPILibrary
 {
-    public class TypeFieldJsonHelper
+    public static class TypeFieldJsonHelper
     {
-        public Type GetTypeFromString(string typeField, Type defaultType)
+        public static Type GetTypeFromString(string typeField, Type defaultType)
         {
             if (string.IsNullOrEmpty(typeField))
             {
@@ -53,6 +53,10 @@ namespace RusticiSoftware.TinCanAPILibrary
             if (string.Compare(typeField, "StatementRef", true) == 0)
             {
                 return typeof(StatementRef);
+            }
+            if (string.Compare(typeField, "SubStatement", true) == 0)
+            {
+                return typeof(SubStatement);
             }
             throw new ArgumentException("Invalid type field specified");
         }

@@ -31,11 +31,11 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         #region Fields
         private string id;
         private Actor actor;
-        private StatementVerb verb;
+        private PredefinedVerb verb;
         private bool inProgress;
-        private StatementTarget _object;
+        private IStatementTarget _object;
         private Result result;
-        private Context context;
+        private RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Context context;
         private NullableDateTime timestamp;
         private Actor authority;
         private NullableBoolean voided;
@@ -43,29 +43,17 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
 
         #region Properties
         /// <summary>
-        /// string representation of the statement verb
+        /// representation of the statement verb
         /// </summary>
-        public virtual string Verb
+        public PredefinedVerb Verb
         {
             get
             {
-                return verb == StatementVerb.Undefined ? null : verb.ToString().ToLower();
+                return verb;
             }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentException("Verb may not be null", "value");
-                }
-                string normalized = value.ToLower();
-                try
-                {
-                    verb = (StatementVerb)Enum.Parse(typeof(StatementVerb), normalized, true);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException("Verb " + normalized + " is not valid", "value");
-                }
+                verb = value;
             }
         }
         /// <summary>
@@ -105,7 +93,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// Returns the statement verb in its internal enum format
         /// </summary>
         /// <returns>Statement verb as an enum</returns>
-        public StatementVerb GetVerbAsEnum()
+        public PredefinedVerb GetVerbAsEnum()
         {
             return verb;
         }
@@ -113,7 +101,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// <summary>
         /// The target object of this statement
         /// </summary>
-        public StatementTarget Object
+        public IStatementTarget Object
         {
             get { return _object; }
             set { _object = value; }
@@ -131,7 +119,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// <summary>
         /// Context information for this statement
         /// </summary>
-        public Context Context
+        public RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Context Context
         {
             get { return context; }
             set { context = value; }
@@ -186,7 +174,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// <param name="actor">The actor in this statement</param>
         /// <param name="verb">The verb in this statement</param>
         /// <param name="statementTarget">The target of this statement</param>
-        public Statement(Actor actor, StatementVerb verb, StatementTarget statementTarget)
+        public Statement(Actor actor, PredefinedVerb verb, IStatementTarget statementTarget)
         {
             this.actor = actor;
             this.verb = verb;
@@ -203,7 +191,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
             var failures = new List<ValidationFailure>();
-            if (actor == null && verb != StatementVerb.Voided)
+            if (actor == null && verb != PredefinedVerb.Voided)
             {
                 failures.Add(new ValidationFailure("Statement " + id + " does not have an actor", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
@@ -211,7 +199,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
                     return failures;
                 }
             }
-            if (Verb == null)
+            if (Verb == PredefinedVerb.None)
             {
                 failures.Add(new ValidationFailure("Statement " + id + " does not have a verb", ValidationLevel.Must));
                 if (earlyReturnOnFailure)
@@ -227,7 +215,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
                     return failures;
                 }
             }
-            if (verb == StatementVerb.Voided)
+            if (verb == PredefinedVerb.Voided)
             {
                 bool objectStatementIdentified = (_object is TargetedStatement) && !string.IsNullOrEmpty(((TargetedStatement)_object).Id);
                 if (!objectStatementIdentified)
@@ -338,6 +326,10 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// such the two instances of the statement are inextricably linked.</remarks>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement(Statement source)
         {
+            if (source == null)
+            {
+                return null;
+            }
             var result = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement();
             result.Id = source.Id;
             result.Actor = (Model.Actor)source.Actor;
@@ -367,6 +359,10 @@ namespace RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90
         /// <returns></returns>
         public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.Statement(Statement source)
         {
+            if (source == null)
+            {
+                return null;
+            }
             return (RusticiSoftware.TinCanAPILibrary.Model.Statement)(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.Statement)source;
         }
         #endregion

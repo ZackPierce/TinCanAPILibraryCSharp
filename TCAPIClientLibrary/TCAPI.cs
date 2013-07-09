@@ -404,7 +404,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                         voided.Object = new StatementRef(statementIdsToVoid[i]);
                         break;
                 }
-                voided.Verb = new StatementVerb(PredefinedVerbs.Voided);
+                voided.Verb = new StatementVerb(PredefinedVerb.Voided);
                 voided.Actor = adminActor;
                 statementsToVoid[i] = voided;
             }
@@ -437,7 +437,7 @@ namespace RusticiSoftware.TinCanAPILibrary
                         voided.Object = new StatementRef(statementIdsToVoid[i]);
                         break;
                 }
-                voided.Verb = new StatementVerb(PredefinedVerbs.Voided);
+                voided.Verb = new StatementVerb(PredefinedVerb.Voided);
                 voided.Actor = adminActor;
                 statements[i] = voided;
             }
@@ -488,8 +488,11 @@ namespace RusticiSoftware.TinCanAPILibrary
             switch (version)
             {
                 // TODO - fix the versioning here! Quite broken
-                case TCAPIVersion.TinCan095:
+                case TCAPIVersion.TinCan1p0p0:
                     result = (StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(StatementResult));
+                    break;
+                case TCAPIVersion.TinCan095:
+                    result = (StatementResult)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.StatementResult)));
                     break;
                 case TCAPIVersion.TinCan090:
                     result = (StatementResult)((RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)converter.DeserializeJSON(resultAsJSON, typeof(RusticiSoftware.TinCanAPILibrary.Model.TinCan0p90.StatementResult)));

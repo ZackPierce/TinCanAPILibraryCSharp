@@ -29,7 +29,7 @@ namespace TinCanAPILibraryUnitTests.Model
                     }
                 }
             };
-            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: true));
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
             Assert.AreEqual(0, failures.Count);
         }
 
@@ -41,7 +41,7 @@ namespace TinCanAPILibraryUnitTests.Model
                 Mbox = "mailto:group@example.com",
                 Member = new Actor[] { }
             };
-            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: true));
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
             Assert.AreEqual(0, failures.Count);
         }
 
@@ -58,7 +58,7 @@ namespace TinCanAPILibraryUnitTests.Model
                     }
                 }
             };
-            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: true));
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
             Assert.AreEqual(0, failures.Count);
         }
 
@@ -80,8 +80,36 @@ namespace TinCanAPILibraryUnitTests.Model
             {
                 Member = null
             };
-            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: true));
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
             Assert.AreEqual(1, failures.Count);
+        }
+
+        [Test]
+        public void Validate_produces_no_failures_for_an_identified_with_no_members_array()
+        {
+            var group = new Group()
+            {
+                Mbox = "mailto:someGroup@example.com",
+                Member = null
+            };
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
+            Assert.AreEqual(0, failures.Count);
+        }
+
+        [Test]
+        public void Validate_produces_a_failure_for_CreateInvalidGroup_output()
+        {
+            var group = CreateInvalidGroup();
+            var failures = new List<ValidationFailure>(group.Validate(earlyReturnOnFailure: false));
+            Assert.AreEqual(1, failures.Count);
+        }
+
+        internal static Group CreateInvalidGroup()
+        {
+            return new Group()
+            {
+                Member = new Actor[] { }
+            };
         }
     }
 }

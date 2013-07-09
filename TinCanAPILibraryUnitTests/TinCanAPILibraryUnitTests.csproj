@@ -46,12 +46,20 @@
     <Compile Include="Model\ActivityFixture.cs" />
     <Compile Include="Model\ActorFixture.cs" />
     <Compile Include="Model\AgentAccountFixture.cs" />
+    <Compile Include="Model\AttachmentFixture.cs" />
+    <Compile Include="Model\ContextActivitiesFixture.cs" />
+    <Compile Include="Model\ContextFixture.cs" />
     <Compile Include="Model\GroupFixture.cs" />
     <Compile Include="Model\InteractionComponentFixture.cs" />
     <Compile Include="Model\InteractionDefinitionFixture.cs" />
+    <Compile Include="Model\InteractionFixture.cs" />
     <Compile Include="Model\LanguageMapFixture.cs" />
+    <Compile Include="Model\ResultFixture.cs" />
+    <Compile Include="Model\ScoreFixture.cs" />
     <Compile Include="Model\StatementFixture.cs" />
+    <Compile Include="Model\StatementRefFixture.cs" />
     <Compile Include="Model\StatementVerbFixture.cs" />
+    <Compile Include="Model\SubStatementFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

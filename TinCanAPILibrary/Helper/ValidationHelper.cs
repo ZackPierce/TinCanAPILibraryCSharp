@@ -1,6 +1,6 @@
 ﻿#region License
 /*
-Copyright 2012 Rustici Software
+Copyright 2012 Rustici Software, Measured Progress
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,6 +43,13 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
 
         private const string Bcp47Pattern = @"^(?:(en-GB-oed|i-(?:ami|bnn|default|enochian|hak|klingon|lux|mingo|navajo|pwn|tao|tay|tsu)|sgn-(?:BE-FR|BE-NL|CH-DE))|(art-lojban|cel-gaulish|no-(?:bok|nyn)|zh-(?:guoyu|hakka|min|min-nan|xiang)))$|^(x(?:-[0-9a-z]{1,8})+)$|^(?:((?:[a-z]{2,3}(?:(?:-[a-z]{3}){1,3})?)|[a-z]{4}|[a-z]{5,8})(?:-([a-z]{4}))?(?:-([a-z]{2}|[0-9]{3}))?((?:-(?:[a-z0-9]{5,8}|[0-9][a-z0-9]{3}))*)?((?:-[0-9a-wy-z](?:-[a-z0-9]{2,8}){1,})*)?(-x(?:-[0-9a-z]{1,8})+)?)$";
         private static readonly Regex Bcp47Regex = new Regex(Bcp47Pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private const string Base64Pattern = @"^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
+        private static readonly Regex Base64Regex = new Regex(Base64Pattern, RegexOptions.Compiled);
+
+        private const string SemanticVersioning1p0p0Pattern = @"^((\d+)\.(\d+)\.(\d+))(?:-([\dA-Za-z\-]+))?$";
+        private static readonly Regex SemanticVersioning1p0p0Regex = new Regex(SemanticVersioning1p0p0Pattern, RegexOptions.Compiled);
+        
 
         /// <summary>
         /// Validates an email address.
@@ -130,6 +137,38 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
             return Bcp47Regex.IsMatch(potential);
         }
 
+        public static bool IsValidBase64(string potential)
+        {
+            if (string.IsNullOrEmpty(potential))
+            {
+                return false;
+            }
+            return Base64Regex.IsMatch(potential);
+        }
+
+        public static bool IsValidInternetMediaType(string potential)
+        {
+            if (string.IsNullOrEmpty(potential))
+            {
+                return false;
+            }
+            return true; // TODO - Complete validation for Internet Media Type via RFC 2046
+        }
+
+        /// <summary>
+        /// Whether or not a string conforms to the Semantic Versioning 1.0.0 specification.
+        /// </summary>
+        /// <param name="potential"></param>
+        /// <returns></returns>
+        public static bool IsValidSemanticVersion1p0p0(string potential)
+        {
+            if (string.IsNullOrEmpty(potential))
+            {
+                return false;
+            }
+            return SemanticVersioning1p0p0Regex.IsMatch(potential);
+        }
+
         /// <summary>
         /// If the target is non-null, calls Validate on the target and adds the resulting ValidationFailure objects to the
         /// outputFailures collection. 
@@ -149,6 +188,55 @@ namespace RusticiSoftware.TinCanAPILibrary.Helper
             var cachedLength = outputFailures.Count;
             outputFailures.AddRange(target.Validate(earlyReturnOnFailure));
             return cachedLength != outputFailures.Count;
+        }
+
+        /// <summary>
+        /// If the target collection is non-null, calls Validate on the target members and adds the resulting ValidationFailure objects to the
+        /// outputFailures collection. Reports a failure for each null member of the collection.
+        /// 
+        /// If the target is null, returns false with no alterations to the outputFailures collection.
+        /// </summary>
+        /// <param name="outputFailures"></param>
+        /// <param name="target"></param>
+        /// <param name="earlyReturnOnFailure"></param>
+        /// <returns>true if any new ValidationFailures were added to the output collection, false otherwise.</returns>
+        internal static bool ValidateAndAddFailures(List<ValidationFailure> outputFailures, IEnumerable<IValidatable> target, bool earlyReturnOnFailure)
+        {
+            if (target == null)
+            {
+                return false;
+            }
+            var cachedLength = outputFailures.Count;
+            foreach (var item in target)
+            {
+                if (item == null)
+                {
+                    outputFailures.Add(new ValidationFailure("null members are not permitted in collections derived from JSON Arrays in the raw Statement", ValidationLevel.Must));
+                    if (earlyReturnOnFailure)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    outputFailures.AddRange(item.Validate(earlyReturnOnFailure));
+                    if (earlyReturnOnFailure && cachedLength != outputFailures.Count)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return cachedLength != outputFailures.Count;
+        }
+
+        internal static bool MandatoryNonNullValidateAndAddFailures(List<ValidationFailure> outputFailures, IValidatable target, bool earlyReturnOnFailure, string propertyTrace, ValidationLevel level)
+        {
+            if (target == null)
+            {
+                outputFailures.Add(new ValidationFailure(string.Format("{0} was required to be present, but was null.", propertyTrace), level));
+                return true;
+            }
+            return ValidateAndAddFailures(outputFailures, target, earlyReturnOnFailure);
         }
 
         internal static bool AddFailureIfContainsNullMembers<T>(List<ValidationFailure> outputFailures, IEnumerable<T> collection, ValidationLevel level, bool earlyReturnOnFailure) where T : class

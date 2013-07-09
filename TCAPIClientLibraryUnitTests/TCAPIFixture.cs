@@ -53,7 +53,7 @@ namespace UnitTests
             activity.Definition = new ActivityDefinition();
             activity.Definition.Name = new LanguageMap();
             activity.Definition.Name.Add("en-US", "TCAPI C# 0.95 Library.");
-            statements[0] = new Statement(new Actor("Example", "mailto:test@example.com"), new StatementVerb(PredefinedVerbs.Experienced), activity);
+            statements[0] = new Statement(new Actor("Example", "mailto:test@example.com"), new StatementVerb(PredefinedVerb.Experienced), activity);
             target.StoreStatements(statements);
             Assert.Inconclusive(INCONCLUSIVE);
         }
@@ -397,13 +397,13 @@ namespace UnitTests
                 switch (j)
                 {
                     case 0:
-                        statements[i] = new Statement(new Actor("Mufasa", "mailto:Mufasa@gmail.com"), new StatementVerb(PredefinedVerbs.Experienced), new Activity("test activity"));
+                        statements[i] = new Statement(new Actor("Mufasa", "mailto:Mufasa@gmail.com"), new StatementVerb(PredefinedVerb.Experienced), new Activity("test activity"));
                         break;
                     case 1:
-                        statements[i] = new Statement(new Actor("Carl", "mailto:carl@example.co.uk"), new StatementVerb(PredefinedVerbs.Experienced), new Activity("TinCanClientLibrary"));
+                        statements[i] = new Statement(new Actor("Carl", "mailto:carl@example.co.uk"), new StatementVerb(PredefinedVerb.Experienced), new Activity("TinCanClientLibrary"));
                         break;
                     case 2:
-                        statements[i] = new Statement(new Actor("DiBiase", "mailto:DiBiase@notarealbanana.sup"), new StatementVerb(PredefinedVerbs.Experienced), new Activity("test activity"));
+                        statements[i] = new Statement(new Actor("DiBiase", "mailto:DiBiase@notarealbanana.sup"), new StatementVerb(PredefinedVerb.Experienced), new Activity("test activity"));
                         break;
                 }
             }   

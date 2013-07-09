@@ -63,7 +63,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 }
 
             }
-            else
+            else if (member != null)
             {
                 foreach (Actor a in member)
                 {

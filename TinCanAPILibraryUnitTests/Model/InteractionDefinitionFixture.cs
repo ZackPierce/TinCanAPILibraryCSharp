@@ -35,7 +35,7 @@ namespace TinCanAPILibraryUnitTests.Model
         }
 
         [Test]
-        public void Validate_produces_a_failrue_for_a_null_interactionType()
+        public void Validate_produces_a_failure_for_a_null_interactionType()
         {
             var definition = new InteractionDefinition()
             {

@@ -196,7 +196,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 }
             }
 
-            failures.AddRange(this.ValidateExtensions(earlyReturnOnFailure));
+            this.AddExtensionValidationResults(failures, earlyReturnOnFailure);
 
             return failures;
         }

@@ -13,8 +13,8 @@ namespace TinCanAPILibraryUnitTests.Model
         [Test]
         public void Validate_produces_no_failure_for_valid_activity()
         {
-            var activity = new Activity("http://example.com/activities/A");
-            var rawResults = activity.Validate(earlyReturnOnFailure: true);
+            var activity = CreateValidActivity();
+            var rawResults = activity.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(rawResults);
             var failures = new List<ValidationFailure>(rawResults);
             Assert.AreEqual(0, failures.Count);
@@ -25,7 +25,7 @@ namespace TinCanAPILibraryUnitTests.Model
         {
             var activity = new Activity();
             activity.Id = null;
-            var rawResults = activity.Validate(earlyReturnOnFailure: true);
+            var rawResults = activity.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(rawResults);
             var failures = new List<ValidationFailure>(rawResults);
             Assert.AreEqual(1, failures.Count);
@@ -37,7 +37,7 @@ namespace TinCanAPILibraryUnitTests.Model
         {
             var activity = new Activity();
             activity.Id = "[]{} not an IRI";
-            var rawResults = activity.Validate(earlyReturnOnFailure: true);
+            var rawResults = activity.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(rawResults);
             var failures = new List<ValidationFailure>(rawResults);
             Assert.AreEqual(1, failures.Count);
@@ -49,7 +49,7 @@ namespace TinCanAPILibraryUnitTests.Model
         {
             var activity = new Activity();
             activity.Id = "relativeIRI";
-            var rawResults = activity.Validate(earlyReturnOnFailure: true);
+            var rawResults = activity.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(rawResults);
             var failures = new List<ValidationFailure>(rawResults);
             Assert.AreEqual(1, failures.Count);
@@ -65,12 +65,37 @@ namespace TinCanAPILibraryUnitTests.Model
                 Name = new LanguageMap()
                 {
                     {"not a valid language tag", "should bubble up"}
-                }
+                },
+                Type = new Uri("http://adl.example.com/activityType/A/B", UriKind.Absolute)
             };
-            var rawResults = activity.Validate(earlyReturnOnFailure: true);
+            var rawResults = activity.Validate(earlyReturnOnFailure: false);
             Assert.NotNull(rawResults);
             var failures = new List<ValidationFailure>(rawResults);
             Assert.AreEqual(1, failures.Count);
+        }
+
+        internal static Activity CreateValidActivity()
+        {
+            return new Activity()
+            {
+                Id = "http://example.com/activities/A",
+                Definition = new ActivityDefinition()
+                {
+                    Name = new LanguageMap()
+                    {
+                        {"en-US", "Name A"}
+                    },
+                    Type = new Uri("http://adl.example.com/activityType/A/B", UriKind.Absolute)
+                }
+            };
+        }
+
+        internal static Activity CreateInvalidActivity()
+        {
+            return new Activity()
+            {
+                Id = null
+            };
         }
     }
 }

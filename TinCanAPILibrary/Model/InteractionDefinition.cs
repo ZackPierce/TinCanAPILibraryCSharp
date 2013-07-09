@@ -140,8 +140,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 return failures;
             }
 
-            
-
             if (this.Type != null && this.Type.ToString() != Constants.CmiInteractionActivityType)
             {
                 failures.Add(new ValidationFailure("Interaction activities should have a type property of value 'http://adlnet.gov/expapi/activities/cmi.interaction', but found a type property of: " + this.Type, ValidationLevel.Should));

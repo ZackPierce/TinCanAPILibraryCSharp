@@ -19,31 +19,45 @@ using System;
 using System.Collections.Generic;
 
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
+    /// <summary>
+    /// TinCan 1.0.0 ContextActivities
+    /// TODO - handle special case deserialization where the properties may be single Activity objects rather than arrays.
+    /// </summary>
     public class ContextActivities : IValidatable
     {
         #region Fields
-        private Activity parent;
-        private Activity grouping;
-        private Activity other;
+        private Activity[] parent;
+        private Activity[] grouping;
+        private Activity[] category;
+        private Activity[] other;
         #endregion
 
+        private const string conversionDataLossWarningTemplate = "Could not convert RusticiSoftware.TinCanAPILibrary.Model.ContextActivities to RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.ContextActivities without losing data from the {0} property, which had {1} members";
+
         #region Properties
-        public Activity Parent
+        public Activity[] Parent
         {
             get { return parent; }
             set { parent = value; }
         }
 
-        public Activity Grouping
+        public Activity[] Grouping
         {
             get { return grouping; }
             set { grouping = value; }
         }
 
-        public Activity Other
+        public Activity[] Category
+        {
+            get { return category; }
+            set { category = value; }
+        }
+
+        public Activity[] Other
         {
             get { return other; }
             set { other = value; }
@@ -56,21 +70,55 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
 
         public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
-            //Validate children
-            object[] children = new object[] { parent, grouping, other };
             var failures = new List<ValidationFailure>();
-            foreach (object child in children)
+            foreach (IValidatable[] validatableKidSet in new IValidatable[][] { parent, grouping, category, other })
             {
-                if (child != null && child is IValidatable)
+                if (ValidationHelper.ValidateAndAddFailures(failures, validatableKidSet, earlyReturnOnFailure) && earlyReturnOnFailure)
                 {
-                    failures.AddRange(((IValidatable)child).Validate(earlyReturnOnFailure));
-                    if (earlyReturnOnFailure && failures.Count > 0)
-                    {
-                        return failures;
-                    }
+                    return failures;
                 }
             }
             return failures;
         }
+
+        #region Version Conversion
+        public static explicit operator RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.ContextActivities(ContextActivities source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+            var sink = new RusticiSoftware.TinCanAPILibrary.Model.TinCan0p95.ContextActivities();
+            if (source.grouping != null && source.grouping.Length > 0)
+            {
+                sink.Grouping = source.grouping[0];
+                if (source.grouping.Length > 1)
+                {
+                    throw new ArgumentException(string.Format(conversionDataLossWarningTemplate, "grouping", source.grouping.Length));
+                }
+            }
+            if (source.other != null && source.other.Length > 0)
+            {
+                sink.Other = source.Other[0];
+                if (source.Other.Length > 1)
+                {
+                    throw new ArgumentException(string.Format(conversionDataLossWarningTemplate, "other", source.Other.Length));
+                }
+            }
+            if (source.parent != null && source.parent.Length > 0)
+            {
+                sink.Parent = source.parent[0];
+                if (source.Parent.Length > 1)
+                {
+                    throw new ArgumentException(string.Format(conversionDataLossWarningTemplate, "parent", source.parent.Length));
+                }
+            }
+            if (source.category != null && source.category.Length > 0)
+            {
+                throw new ArgumentException(string.Format(conversionDataLossWarningTemplate, "category", source.grouping.Length));
+            }
+            return sink;
+        }
+        #endregion
     }
 }

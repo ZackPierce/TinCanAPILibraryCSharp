@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 
 using System.Text;
+using RusticiSoftware.TinCanAPILibrary.Helper;
 
 namespace RusticiSoftware.TinCanAPILibrary.Model
 {
@@ -72,19 +73,13 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         #region Public Methods
         public IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
         {
-            object[] children = new object[] { score };
             var failures = new List<ValidationFailure>();
-            foreach (object o in children)
+            if (ValidationHelper.ValidateAndAddFailures(failures, score, earlyReturnOnFailure) && earlyReturnOnFailure)
             {
-                if (o != null && o is IValidatable)
-                {
-                    failures.AddRange(((IValidatable)o).Validate(earlyReturnOnFailure));
-                    if (earlyReturnOnFailure && failures.Count > 0)
-                    {
-                        return failures;
-                    }
-                }
+                return failures;
             }
+
+            this.AddExtensionValidationResults(failures, earlyReturnOnFailure);
             return failures;
         }
         #endregion

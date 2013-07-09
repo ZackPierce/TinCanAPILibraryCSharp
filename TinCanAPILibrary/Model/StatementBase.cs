@@ -24,38 +24,19 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     using RusticiSoftware.TinCanAPILibrary.Helper;
 
     /// <summary>
-    /// Base class for Statement
+    /// Base class for Statements (0.95 and 1.0.x)
     /// </summary>
-    public abstract class StatementBase
+    public abstract class StatementBase : PartialStatementBase
     {
         #region Fields
         private string id;
-        private Actor actor;
-        private StatementVerb verb;
-        private StatementTarget _object;
-        private Result result;
-        private Context context;
-        private NullableDateTime timestamp;
         private NullableDateTime stored;
         private Actor authority;
 
         #endregion
 
         #region Properties
-        /// <summary>
-        /// string representation of the statement verb
-        /// </summary>
-        public virtual StatementVerb Verb
-        {
-            get
-            {
-                return verb;
-            }
-            set
-            {
-                verb = value;
-            }
-        }
+
         /// <summary>
         /// The statements ID
         /// </summary>
@@ -63,60 +44,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         {
             get { return id; }
             set { id = value; }
-        }
-
-        /// <summary>
-        /// The statements actor
-        /// </summary>
-        public Actor Actor
-        {
-            get { return actor; }
-            set { actor = value; }
-        }
-
-        /// <summary>
-        /// Returns the statement verb in its internal enum format
-        /// </summary>
-        /// <returns>Statement verb as an enum</returns>
-        public StatementVerb GetVerbAsEnum()
-        {
-            return verb;
-        }
-
-        /// <summary>
-        /// The target object of this statement
-        /// </summary>
-        public StatementTarget Object
-        {
-            get { return _object; }
-            set { _object = value; }
-        }
-
-        /// <summary>
-        /// The result of this statement
-        /// </summary>
-        public Result Result
-        {
-            get { return result; }
-            set { result = value; }
-        }
-
-        /// <summary>
-        /// Context information for this statement
-        /// </summary>
-        public Context Context
-        {
-            get { return context; }
-            set { context = value; }
-        }
-
-        /// <summary>
-        /// The timestamp of this statement
-        /// </summary>
-        public NullableDateTime Timestamp
-        {
-            get { return timestamp; }
-            set { timestamp = value; }
         }
 
         /// <summary>
@@ -129,15 +56,13 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         }
 
         /// <summary>
-        /// The authority for this statement
+        /// The authority for this statement. Agent or Group who is asserting this Statement is true.
         /// </summary>
         public Actor Authority
         {
             get { return authority; }
             set { authority = value; }
         }
-
-
 
         #endregion
 
@@ -153,12 +78,8 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <param name="actor">The actor in this statement</param>
         /// <param name="verb">The verb in this statement</param>
         /// <param name="statementTarget">The target of this statement</param>
-        public StatementBase(Actor actor, StatementVerb verb, StatementTarget statementTarget)
-        {
-            this.actor = actor;
-            this.verb = verb;
-            this._object = statementTarget;
-        }
+        public StatementBase(Actor actor, StatementVerb verb, IStatementTarget statementTarget) : base(actor, verb, statementTarget) 
+        { }
 
         /// <summary>
         /// Creates a statement with a verb from the predefined verb enumeration.
@@ -166,21 +87,26 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         /// <param name="actor">The actor in this statement</param>
         /// <param name="verb">The PredefinedVerb of this statement</param>
         /// <param name="statementTarget">The target statement</param>
-        public StatementBase(Actor actor, PredefinedVerbs verb, StatementTarget statementTarget)
-            : this(actor, new StatementVerb(verb), statementTarget)
+        public StatementBase(Actor actor, PredefinedVerb verb, IStatementTarget statementTarget)
+            : base(actor, verb, statementTarget)
         {
         }
         #endregion
 
-        #region Public Methods
+        #region Protected Methods
         /// <summary>
         /// Validates the statement, ensuring required fields are used
         /// and any necessary information (such as a result for specific verbs)
         /// is provided and valid.
         /// </summary>
-        public virtual IEnumerable<ValidationFailure> Validate(bool earlyReturnOnFailure)
+        protected override List<ValidationFailure> validateImplementation(bool earlyReturnOnFailure)
         {
-            var failures = new List<ValidationFailure>();
+            var failures = base.validateImplementation(earlyReturnOnFailure);
+            if (earlyReturnOnFailure && failures.Count > 0)
+            {
+                return failures;
+            }
+
             if (id == null)
             {
                 failures.Add(new ValidationFailure(string.Format("Statement had a null id property. Id should be a UUID string.", id), ValidationLevel.Should));
@@ -198,57 +124,23 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 }
             }
 
-            if (actor == null && verb != null && !verb.IsVoided())
+            if (authority != null)
             {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an actor", ValidationLevel.Must));
-                if (earlyReturnOnFailure)
+                if (ValidationHelper.ValidateAndAddFailures(failures, authority, earlyReturnOnFailure) && earlyReturnOnFailure)
                 {
                     return failures;
                 }
-            }
-
-            if (Verb == null)
-            {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have a verb", ValidationLevel.Must));
-                if (earlyReturnOnFailure)
+                var authorityGroup = authority as Group;
+                if (authorityGroup != null)
                 {
-                    return failures;
-                }
-            }
-            else if (verb.IsVoided())
-            {
-                // This will test for StatementRef OR TargetedStatement because any statement that is being validated has already been promoted.
-                bool objectStatementIdentified = ((_object is StatementRef) && !string.IsNullOrEmpty(((StatementRef)_object).Id) ||
-                    (_object is Model.TinCan0p90.TargetedStatement) && !string.IsNullOrEmpty(((Model.TinCan0p90.TargetedStatement)_object).Id));
-                if (!objectStatementIdentified)
-                {
-                    failures.Add(new ValidationFailure("Statement " + id + " has verb 'voided' but does not properly identify a statement as its object", ValidationLevel.Must));
-                    if (earlyReturnOnFailure)
+                    var numMembers = authorityGroup.Member == null ? 0 : authorityGroup.Member.Length;
+                    if (numMembers != 2)
                     {
-                        return failures;
-                    }
-                }
-            }
-
-            if (_object == null)
-            {
-                failures.Add(new ValidationFailure("Statement " + id + " does not have an object", ValidationLevel.Must));
-                if (earlyReturnOnFailure)
-                {
-                    return failures;
-                }
-            }
-
-
-            object[] children = new object[] { actor, verb, _object, result, context, timestamp, authority };
-            foreach (object o in children)
-            {
-                if (o != null && o is IValidatable)
-                {
-                    failures.AddRange(((IValidatable)o).Validate(earlyReturnOnFailure));
-                    if (earlyReturnOnFailure && failures.Count > 0)
-                    {
-                        return failures;
+                        failures.Add(new ValidationFailure(string.Format("If the authority is a Group, it must contain two Agent members that represent the application and the user, but {0} members were found", numMembers), ValidationLevel.Must));
+                        if (earlyReturnOnFailure)
+                        {
+                            return failures;
+                        }
                     }
                 }
             }
@@ -257,32 +149,6 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
         #endregion
 
         #region Verb Handling
-        /// <summary>
-        /// Handles verbs with special requirements
-        /// </summary>
-        public void HandleSpecialVerbs()
-        {
-            if (this.Verb.Equals("passed"))
-            {
-                result = (result == null) ? new Result() : result;
-                VerifySuccessAndCompletionValues(result, "passed", true, true);
-                result.Success = true;
-                result.Completion = true;
-            }
-            else if (this.Verb.Equals("failed"))
-            {
-                result = (result == null) ? new Result() : result;
-                VerifySuccessAndCompletionValues(result, "failed", false, true);
-                result.Success = false;
-                result.Completion = true;
-            }
-            else if (this.Verb.Equals("completed"))
-            {
-                result = (result == null) ? new Result() : result;
-                VerifyCompletionValue(result, "completed", true);
-                result.Completion = true;
-            }
-        }
 
         /// <summary>
         /// Validates both success and completion

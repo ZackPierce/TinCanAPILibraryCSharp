@@ -25,7 +25,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
     {
         #region Fields
         protected string verb;
-        protected StatementTarget targetObject;
+        protected IStatementTarget targetObject;
         protected string registration;
         protected bool context;
         protected Actor actor;
@@ -56,7 +56,7 @@ namespace RusticiSoftware.TinCanAPILibrary.Model
                 verb = value; 
             } 
         }
-        public StatementTarget TargetObject 
+        public IStatementTarget TargetObject 
         { 
             get 
             { 

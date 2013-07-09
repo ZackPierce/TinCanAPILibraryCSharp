@@ -56,5 +56,77 @@ namespace TinCanAPILibraryUnitTests.JSONConverter.JSON.TinCanConverter
             Assert.IsInstanceOf<Activity>(statement.Object);
             Assert.AreEqual("http://example.adlnet.gov/xapi/example/activity", (statement.Object as Activity).Id);
         }
+
+        [Test]
+        public void ContextActivities_with_array_properties_deserializes_into_collections()
+        {
+            var source = @"{
+                'id': '12345678-1234-5678-1234-567812345678',
+                'actor':{
+                    'mbox':'mailto:xapi@adlnet.gov'
+                },
+                'verb':{
+                    'id':'http://adlnet.gov/expapi/verbs/created',
+                    'display':{
+                        'en-US':'created'
+                    }
+                },
+                'object':{
+                    'id':'http://example.adlnet.gov/xapi/example/activity'
+                },
+                'context':{
+                    'contextActivities':{
+                        'parent':[
+                            {
+                                'objectType':'Activity',
+                                'id':'http://example.adlnet.gov/xapi/example/activity/2'
+                            }
+                        ]
+                    }
+                }
+            }";
+            Statement statement = converter.DeserializeJSON(source, typeof(Statement)) as Statement;
+            Assert.NotNull(statement);
+            Assert.NotNull(statement.Context);
+            Assert.NotNull(statement.Context.ContextActivities);
+            Assert.NotNull(statement.Context.ContextActivities.Parent);
+            Assert.AreEqual(1, statement.Context.ContextActivities.Parent.Length);
+            Assert.AreEqual("http://example.adlnet.gov/xapi/example/activity/2", statement.Context.ContextActivities.Parent[0].Id);
+        }
+
+        [Test]
+        public void ContextActivities_with_single_Activity_properties_deserializes_into_relevant_collection()
+        {
+            var source = @"{
+                'id': '12345678-1234-5678-1234-567812345678',
+                'actor':{
+                    'mbox':'mailto:xapi@adlnet.gov'
+                },
+                'verb':{
+                    'id':'http://adlnet.gov/expapi/verbs/created',
+                    'display':{
+                        'en-US':'created'
+                    }
+                },
+                'object':{
+                    'id':'http://example.adlnet.gov/xapi/example/activity'
+                },
+                'context':{
+                    'contextActivities':{
+                        'parent': {
+                            'objectType':'Activity',
+                            'id':'http://example.adlnet.gov/xapi/example/activity/2'
+                        }
+                    }
+                }
+            }";
+            Statement statement = converter.DeserializeJSON(source, typeof(Statement)) as Statement;
+            Assert.NotNull(statement);
+            Assert.NotNull(statement.Context);
+            Assert.NotNull(statement.Context.ContextActivities);
+            Assert.NotNull(statement.Context.ContextActivities.Parent);
+            Assert.AreEqual(1, statement.Context.ContextActivities.Parent.Length);
+            Assert.AreEqual("http://example.adlnet.gov/xapi/example/activity/2", statement.Context.ContextActivities.Parent[0].Id);
+        }
     }
 }
